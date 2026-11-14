@@ -1,0 +1,72 @@
+7-Zip's 7z reader and decryption routines for Comic Reader
+==========================================================
+
+What is in this folder
+
+  sevenzip.wasm         Parts of 7-Zip compiled to WebAssembly: its 7z
+                        reader, and its decryption routines for RAR and
+                        for zip's AES.
+  sevenzip.mjs          The loader Emscripten generates for it.
+  sevenzip-extract.mjs  Comic Reader's extraction loop for 7z
+                        (AGPL-3.0-or-later).
+  decrypt-rar.mjs       Comic Reader's code that turns an encrypted RAR
+  decrypt-zip.mjs       archive, or an AES-encrypted zip, into the same
+  decrypt-common.mjs    archive without the encryption (AGPL-3.0-or-later).
+  sevenzip-worker.mjs   Comic Reader's worker around them
+                        (AGPL-3.0-or-later).
+  License.txt           7-Zip's licence notice (DOC/License.txt).
+  copying.txt           GNU Lesser General Public License, version 2.1
+                        (DOC/copying.txt).
+
+What it is used for
+
+  Password-protected comics and nothing else: to read a 7z archive (.cb7,
+  .c7z), and to decrypt a RAR archive (.cbr), or a zip whose AES entries
+  are in a compression method the zip decoder lacks, for the reader's other
+  decoders to read. An archive without a password never reaches it.
+
+7-Zip
+
+  7-Zip 26.06, https://www.7-zip.org/
+  Copyright (C) 1999-2026 Igor Pavlov. Licensed under the GNU LGPL,
+  version 2.1 or later; some of its files are in the public domain, as
+  stated in them.
+
+  What is compiled in: the files of 7-Zip's own extract-only 7z library
+  (CPP/7zip/Bundles/Format7zExtract), which are the 7z container, the LZMA,
+  LZMA2, PPMd, Deflate, BZip2 and Copy decoders, the BCJ, BCJ2, Delta,
+  byte-swap and other branch filters, and AES-256 with SHA-256; and
+  7-Zip's decryption routines for RAR 2 to 5 and for WinZip AES
+  (CPP/7zip/Crypto: Rar20Crypto, RarAes, Rar5Aes, WzAes, with the HMAC,
+  PBKDF2 and SHA-1 code they use).
+
+  No RAR decompression code is compiled. The files under the "unRAR license
+  restriction" described in License.txt are CPP/7zip/Compress/Rar*, and
+  none of them is here, so that restriction does not apply to this module;
+  neither do the BSD-licensed LZFSE, Zstandard and xxHash parts. The
+  sources are unmodified.
+
+Emscripten
+
+  Both files also contain parts of the Emscripten runtime they were built
+  with; see the "Emscripten runtime" section of THIRD-PARTY-NOTICES.txt in
+  the app folder.
+
+Source and rebuilding
+
+  The source is 7z2606-src.tar.xz from
+  https://github.com/ip7z/7zip/releases/download/26.06/7z2606-src.tar.xz
+  (SHA-256 a4e374c8f864f51df48c2cfd0e1413ec3b2ea030deae852d6a655402ebb61ac4).
+  Comic Reader's source package holds, under native/sevenzip/, that address
+  and hash (sources.txt, sources.sha256), the small C++ interface compiled
+  with the 7-Zip sources (glue.cpp) and the build script (build.sh), which
+  lists every file compiled. `sh scripts/build-sevenzip.sh` downloads the
+  tarball, checks it and builds both files with the Emscripten SDK 7.0.0
+  container, pinned by digest. The build is reproducible, so the copies in
+  this folder should be:
+
+    f7fd2bf4ba97999e340bc3d9e63c5f4b01311cb4aa84f66f110fa45e5bfdb038  sevenzip.mjs
+    6439db9d7eb60ee6851fa29b7d375094966b06263a93ae926407efe704049f37  sevenzip.wasm
+
+  To use a modified 7-Zip, rebuild and replace those two files. Nothing else
+  in the app needs to change.

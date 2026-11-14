@@ -1,0 +1,4 @@
+# The demo comics' intermediate files (_demo/make-comics/build-comics.sh).
+_demo/make-comics/pages/
+_demo/make-comics/jpg/
+_demo/make-comics/staging/

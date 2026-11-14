@@ -1,0 +1,12 @@
+/*
+ * The styles OpenCloud's own page has around the reader: the design system's
+ * Tailwind theme, with the utility classes compiled for what the design
+ * system's components and the reader actually use (in OpenCloud, the shell
+ * compiles them for itself; the reader ships none of its own).
+ */
+@import '../node_modules/@opencloud-eu/design-system/dist/tailwind.css';
+@import '../node_modules/@opencloud-eu/design-system/dist/design-system.css';
+
+@source '../node_modules/@opencloud-eu/design-system/dist';
+@source '../src';
+@source '.';

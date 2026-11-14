@@ -1,0 +1,173 @@
+Comic Reader for OpenCloud Web — v1.2.2
+=======================================
+
+Reads .cbz, .cbr, .cb7 and .c7z comic archives in the OpenCloud file manager.
+
+Requires OpenCloud 6.0.0 or newer (tested on 6.0.0 to 9.1.0, and on the
+7.2.5 stable release).
+
+
+1. WHERE TO PUT THIS FOLDER
+---------------------------
+Inside the container the apps directory is always:
+
+    /var/lib/opencloud/web/assets/apps
+
+Docker Compose (opencloud-compose)
+    The stock compose file bind-mounts it:
+
+        ${OC_APPS_DIR:-./config/opencloud/apps}:/var/lib/opencloud/web/assets/apps
+
+    So on the host, copy this folder to:
+
+        <compose-dir>/config/opencloud/apps/comic-reader/
+
+    unless you have set OC_APPS_DIR in .env, in which case use that path.
+
+    IMPORTANT: do NOT use $OC_DATA_DIR/web/assets/apps. OC_DATA_DIR mounts to
+    /var/lib/opencloud, and the apps mount is layered on top of it at the
+    web/assets/apps subpath. Files placed under the data dir are shadowed by
+    that mount and the app will silently never appear.
+
+Other Docker setups
+    Bind-mount a host directory onto /var/lib/opencloud/web/assets/apps, or
+    relocate the directory inside the container with WEB_ASSET_APPS_PATH.
+
+Bare metal
+    $OC_DATA_DIR/web/assets/apps/comic-reader/
+
+Whichever applies, the result must look like:
+
+    <apps-dir>/comic-reader/manifest.json
+    <apps-dir>/comic-reader/js/...
+    <apps-dir>/comic-reader/vendor/libarchive/...
+    <apps-dir>/comic-reader/vendor/unarr/...
+    <apps-dir>/comic-reader/vendor/sevenzip/...
+
+Create the directory if it does not exist. The container runs as uid:gid
+1000:1000 by default (OC_CONTAINER_UID_GID), so the files must be readable by
+that user.
+
+
+2. CONTENT SECURITY POLICY
+--------------------------
+CBZ works without this step. Everything else needs one addition to
+script-src, because the decoders are WebAssembly:
+
+  'wasm-unsafe-eval'   REQUIRED for CBR / CB7 / C7Z. It permits compiling
+                       WebAssembly and nothing else; it does not allow
+                       eval() or new Function().
+
+That is the only change. In particular the app does NOT need 'unsafe-eval'.
+If an earlier version of Comic Reader had you add it for solid RAR, you can
+remove it again.
+
+A reverse proxy in front of OpenCloud can instead append the keyword to the
+script-src of the policy OpenCloud sends, so that later changes to that
+policy still reach the browser.
+
+Editing csp.yaml directly: find script-src and add the value, quoted:
+
+    script-src:
+      - "'self'"
+      - "'unsafe-inline'"
+      - "'wasm-unsafe-eval'"
+
+Mind the quoting: CSP keywords must reach the browser wrapped in single
+quotes, so in YAML they are written "'wasm-unsafe-eval'". A bare value is
+parsed as a hostname and silently does nothing. csp.yaml replaces the built-in
+policy wholesale, so edit the existing file rather than writing a new one
+containing only script-src.
+
+
+3. RESTART
+----------
+    docker compose restart
+
+Apps are discovered at startup, so a browser refresh alone is not enough.
+
+
+4. VERIFY
+---------
+Click a .cbz file in the file manager. It should open in the reader rather
+than downloading.
+
+No further activation is needed. The server picks up the folder, the web
+runtime reads manifest.json, loads the entry point, and the app registers the
+four comic extensions itself. There is no admin toggle and no allow-list to
+edit.
+
+
+CONFIGURATION (optional)
+------------------------
+Zero config works. To change defaults, edit
+
+    <compose-dir>/config/opencloud/apps.yaml
+
+(already bind-mounted to /etc/opencloud/apps.yaml) and add:
+
+    comic-reader:
+      config:
+        maxArchiveSizeMb: 1024
+        defaultSpread: auto        # single | double | auto
+        defaultFitMode: fit-page   # fit-page | fit-width | fit-height | original
+        registerAsDefault: true    # false = only offer under "Open with"
+
+Prefer apps.yaml over editing manifest.json in this folder: apps.yaml survives
+app updates. The full option list is in the source package README.
+
+
+TROUBLESHOOTING
+---------------
+Comic downloads instead of opening
+    manifest.json is not at the top level of the comic-reader folder, the
+    folder is under the data dir rather than the apps mount, or OpenCloud was
+    not restarted. Check the browser console for an app loading failure.
+
+CBZ opens but CBR/CB7 reports that WebAssembly is not allowed
+    'wasm-unsafe-eval' is missing from script-src, or it was written without
+    the inner single quotes. Confirm what the server actually sends:
+        curl -sI https://<your-host>/ | grep -i content-security-policy
+    The value must contain 'wasm-unsafe-eval' with the quotes intact.
+    Restart OpenCloud after editing csp.yaml; the policy is read at startup.
+
+App does not appear at all
+    Confirm the files are readable by uid 1000, and that
+    <apps-dir>/comic-reader/manifest.json exists inside the container:
+        docker compose exec opencloud ls /var/lib/opencloud/web/assets/apps
+
+
+SOLID RAR
+---------
+Solid RAR archives open with no extra configuration. RAR5 is decoded by
+libarchive; solid RAR4, which libarchive cannot read, is handed to a second
+decoder, unarr, shipped in vendor/unarr/. Both need only 'wasm-unsafe-eval'.
+
+
+PASSWORD-PROTECTED COMICS
+-------------------------
+A password-protected comic, in any of the formats, opens to a password
+prompt, and then opens normally. Nothing has to be configured. The password
+is used in the reader's browser tab only: it is not sent to the server and
+the reader does not save it, so it is asked for each time.
+
+CBZ is decrypted by the zip decoder. CB7 is read by a third decoder, 7-Zip's
+7z reader, shipped in vendor/sevenzip/. CBR is decrypted first, by the same
+module, and then read like any other RAR. That module needs only
+'wasm-unsafe-eval', like the others, and Chrome 95, Firefox 114 or Safari
+15.2 or later.
+
+Not supported: RAR encryption from before RAR 2.0 (before 1996), and
+archives split into volumes. Each says so.
+
+
+LICENCE
+-------
+Copyright (C) 2026 GaijinSystems.
+
+Comic Reader is free software, licensed under the GNU Affero General Public
+License, version 3 or (at your option) any later version. The full text is in
+LICENSE alongside this file.
+
+Bundled third-party components, their licences and where to find their source
+are listed in THIRD-PARTY-NOTICES.txt.
