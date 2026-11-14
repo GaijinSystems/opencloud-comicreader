@@ -1,0 +1,42 @@
+unarr RAR decoder for Comic Reader
+==================================
+
+What is in this folder
+
+  unarr-rar.wasm      unarr's RAR reader compiled to WebAssembly.
+  unarr-rar.mjs       The loader Emscripten generates for it.
+  unarr-extract.mjs   Comic Reader's extraction loop (AGPL-3.0-or-later).
+  unarr-worker.mjs    Comic Reader's worker around it (AGPL-3.0-or-later).
+  COPYING.LESSER      GNU Lesser General Public License, version 3.
+  COPYING             GNU General Public License, version 3, which the
+                      Lesser GPL incorporates by reference.
+
+unarr
+
+  unarr, https://github.com/selmf/unarr
+  commit df462f20a449ced3dd840ae7197d86d28ac5cfe3 (2026-11-01): version 1.2.0
+  plus the development commits made after that release, up to this one.
+  Copyright the unarr project authors. Licensed under the LGPL version 3.
+  It includes code from The Unarchiver project, and from the LZMA SDK and
+  GNUnet (crc32), both of which are in the public domain.
+
+  Only the RAR reader is compiled in: common/, rar/ and the PPMd parts of
+  lzmasdk/, with a small interface of Comic Reader's own (glue.c). unarr's
+  sources are unmodified; native/unarr/upstream.sha256 in the
+  source package lists the hash of every file, for comparison with a
+  checkout of that commit.
+
+Source and rebuilding
+
+  The complete corresponding source is part of Comic Reader's source
+  package, under native/unarr/: the unarr sources used (upstream/), the
+  small C interface compiled with them (glue.c) and the build script
+  (build.sh). `sh scripts/build-unarr.sh` builds both files from them with
+  the Emscripten SDK 7.0.0 container, pinned by digest. The build is
+  reproducible, so the copies in this folder should be:
+
+    4639acf4ab9dd5bbdc5027a3de0cad08f82ed047ee89c33785e09e00c598a273  unarr-rar.mjs
+    7efd6845dfbde91ca5aadd65a31772c00ccdcf9f79d496f3953f970ffdad51a6  unarr-rar.wasm
+
+  To use a modified unarr, rebuild and replace those two files. Nothing else
+  in the app needs to change.

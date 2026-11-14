@@ -1,0 +1,378 @@
+THIRD-PARTY NOTICES
+===================
+
+Comic Reader includes the following third-party software. Each licence
+requires that its notice accompany binary distributions, which is why this
+file ships inside the app folder.
+
+Three WebAssembly modules are part of the app. All are built from source when
+the app is built, by the scripts in native/ of the source package, and all
+three builds are reproducible: the hashes below are what a build with the pinned
+compiler produces, so a copy can be checked against them.
+
+----------------------------------------------------------------------
+zip.js  (https://github.com/gildas-lormeau/zip.js)  — BSD-3-Clause
+----------------------------------------------------------------------
+BSD 3-Clause License
+
+Copyright (c) 2023, Gildas Lormeau
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+libarchive.js  (https://github.com/nika-begiashvili/libarchivejs)  — MIT
+----------------------------------------------------------------------
+The app uses libarchive.js 2.0.2. Its page-side code is bundled into the app.
+Its worker (vendor/libarchive/worker-bundle.js) is bundled from the same
+package's sources, unchanged, around a WebAssembly build of libarchive made
+for this app (see the next section) and a few lines of this app's own code
+that pass the worker's ?v= query on to the request for the .wasm file. The
+C wrapper compiled into that module (native/libarchive/libarchivejs/main.c
+in the source package) is also from
+libarchive.js 2.0.2, with seven changes marked in the file: only the RAR,
+7z and zip readers are enabled, the previous reader is freed when the next is
+opened, an allocation is checked and zeroed, a buffer is freed when a read
+fails, a freed reader is no longer asked for its error string, zip
+checksums can be left uncompared for a zip the app has decrypted, and an
+entry is read to its end, which is where its checksum is compared.
+
+The prebuilt WebAssembly module that libarchive.js itself distributes is not
+used, because it includes OpenSSL 1.0.2.
+
+MIT License
+
+Copyright (c) 2018 ნიკა
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------------------------------------
+Comlink  (https://github.com/GoogleChromeLabs/comlink)  — Apache-2.0
+----------------------------------------------------------------------
+Copyright 2017 Google Inc.
+
+Comlink 4.4.2 is bundled into the app and into vendor/libarchive/worker-bundle.js,
+as a dependency of libarchive.js. It is licensed under the Apache License,
+Version 2.0; the full text is in licences/Apache-2.0.txt alongside this file.
+
+----------------------------------------------------------------------
+unarr  (https://github.com/selmf/unarr)  — LGPL-3.0
+----------------------------------------------------------------------
+Copyright the unarr project authors. unarr includes code from The Unarchiver
+project, and from the LZMA SDK and GNUnet (crc32), which are in the public
+domain.
+
+vendor/unarr/unarr-rar.wasm and unarr-rar.mjs are unarr at commit
+df462f20a449ced3dd840ae7197d86d28ac5cfe3 (version 1.2.0 plus later
+development commits), RAR reader only, compiled to WebAssembly from
+unmodified sources together with a small interface of this app's own
+(native/unarr/glue.c in the source package):
+
+  4639acf4ab9dd5bbdc5027a3de0cad08f82ed047ee89c33785e09e00c598a273  unarr-rar.mjs
+  7efd6845dfbde91ca5aadd65a31772c00ccdcf9f79d496f3953f970ffdad51a6  unarr-rar.wasm
+
+(as built with Emscripten 7.0.0)
+
+The licence texts are in vendor/unarr/COPYING.LESSER (LGPL version 3) and
+vendor/unarr/COPYING (GPL version 3, which the LGPL incorporates). The
+complete corresponding source, with the script that rebuilds these two files
+from it, is in Comic Reader's source package under native/unarr/. See
+vendor/unarr/NOTICE.txt.
+
+----------------------------------------------------------------------
+7-Zip  (https://www.7-zip.org)  — LGPL-2.1-or-later
+----------------------------------------------------------------------
+7-Zip Copyright (C) 1999-2026 Igor Pavlov.
+
+vendor/sevenzip/sevenzip.wasm and sevenzip.mjs are parts of 7-Zip 26.06,
+compiled to WebAssembly from unmodified sources. The reader uses them for
+password-protected archives only: to read 7z, and to decrypt RAR and the AES
+entries of zip for its other decoders to read. What is compiled:
+
+  - the files 7-Zip's own extract-only 7z library is built from: the 7z
+    container, the LZMA, LZMA2, PPMd, Deflate, BZip2 and Copy decoders, the
+    BCJ, BCJ2, Delta, byte-swap and other branch filters, and AES-256 with
+    SHA-256;
+  - 7-Zip's decryption routines for RAR 2 to 5 and for WinZip AES
+    (CPP/7zip/Crypto: Rar20Crypto, RarAes, Rar5Aes, WzAes, with the HMAC,
+    PBKDF2 and SHA-1 code they use).
+
+No RAR decompression code is included: the files under 7-Zip's "unRAR
+license restriction" are CPP/7zip/Compress/Rar*, and none of them is
+compiled, so that restriction does not apply to this module. Nor are the
+BSD-licensed LZFSE, Zstandard and xxHash parts included.
+
+  f7fd2bf4ba97999e340bc3d9e63c5f4b01311cb4aa84f66f110fa45e5bfdb038  sevenzip.mjs
+  6439db9d7eb60ee6851fa29b7d375094966b06263a93ae926407efe704049f37  sevenzip.wasm
+
+(as built with Emscripten 7.0.0)
+
+7-Zip's licence notice is in vendor/sevenzip/License.txt and the licence
+text in vendor/sevenzip/copying.txt (GNU LGPL version 2.1). The source is the
+7-Zip 26.06 source release (7z2606-src.tar.xz, SHA-256
+a4e374c8f864f51df48c2cfd0e1413ec3b2ea030deae852d6a655402ebb61ac4); Comic
+Reader's source package holds, under native/sevenzip/, where to get it, the
+small interface compiled with it, and the script that rebuilds these two
+files from it. See vendor/sevenzip/NOTICE.txt.
+
+----------------------------------------------------------------------
+libarchive  (https://www.libarchive.org)  — BSD-2-Clause
+----------------------------------------------------------------------
+vendor/libarchive/libarchive.wasm is libarchive 3.8.11 with zlib 1.4,
+liblzma (XZ Utils) 5.8.4 and bzip2 1.0.8, compiled to WebAssembly from the
+release tarballs. libarchive is built with one change of this app's, to its
+two RAR readers: the checksum of a stored entry is compared, which it was
+not (native/libarchive/patches/ in the source package). The other three are
+unmodified. No cryptography library is linked in. Built
+with Emscripten 7.0.0 it is:
+
+  f20280b2f702f4774587fd88a78a0d3391f8c7d0c23d94d0ef34d3d25a98803e  libarchive.wasm
+
+The sources are downloaded by scripts/build-libarchive.sh in the source
+package and must match these SHA-256 hashes before they are used:
+
+  900fe9fc7237c2b04f090f3c3648de8fe597525771f5035016537ce2d667d12b  libarchive-3.8.11.tar.gz
+    https://github.com/libarchive/libarchive/releases/download/v3.8.11/libarchive-3.8.11.tar.gz
+  02dd159783677a749c04adbdd02b55b8a2bcc7e054f51b76b549199a916ad584  zlib-1.4.tar.gz
+    https://github.com/madler/zlib/releases/download/v1.4/zlib-1.4.tar.gz
+  0014c7886930454fe8bd4228665b51af55eeae560ea135c9c4cd33f55b2591d9  xz-5.8.4.tar.gz
+    https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz
+  ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269  bzip2-1.0.8.tar.gz
+    https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
+
+libarchive's BLAKE2 files are offered under CC0 1.0, the OpenSSL licence or
+Apache 2.0, at the user's choice; they are used here under CC0 1.0.
+
+libarchive's COPYING file:
+
+The libarchive distribution as a whole is Copyright by Tim Kientzle
+and is subject to the copyright notice reproduced at the bottom of
+this file.
+
+Each individual file in this distribution should have a clear
+copyright/licensing statement at the beginning of the file.  If any do
+not, please let me know and I will rectify it.  The following is
+intended to summarize the copyright status of the individual files;
+the actual statements in the files are controlling.
+
+* Except as listed below, all C sources (including .c and .h files)
+  and documentation files are subject to the copyright notice reproduced
+  at the bottom of this file.
+
+* The following source files are also subject in whole or in part to
+  a 3-clause UC Regents copyright; please read the individual source
+  files for details:
+   libarchive/archive_read_support_filter_compress.c
+   libarchive/archive_write_add_filter_compress.c
+   libarchive/mtree.5
+
+* The following source files are in the public domain:
+   libarchive/archive_parse_date.c
+
+* The following source files are triple-licensed with the ability to choose
+  from CC0 1.0 Universal, OpenSSL or Apache 2.0 licenses:
+   libarchive/archive_blake2.h
+   libarchive/archive_blake2_impl.h
+   libarchive/archive_blake2s_ref.c
+   libarchive/archive_blake2sp_ref.c
+
+* The build files---including Makefiles, configure scripts,
+  and auxiliary scripts used as part of the compile process---have
+  widely varying licensing terms.  Please check individual files before
+  distributing them to see if those restrictions apply to you.
+
+I intend for all new source code to use the license below and hope over
+time to replace code with other licenses with new implementations that
+do use the license below.  The varying licensing of the build scripts
+seems to be an unavoidable mess.
+
+
+Copyright (c) 2003-2018 <author(s)>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer
+   in this position and unchanged.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Note: libarchive's RAR reader is its own implementation and is NOT the
+RARLAB unrar source, so the unrar licence restriction on writing RAR
+archives does not apply here.
+
+----------------------------------------------------------------------
+zlib  (https://zlib.net)  — zlib licence
+----------------------------------------------------------------------
+zlib 1.4, part of vendor/libarchive/libarchive.wasm.
+
+Copyright notice:
+
+ (C) 1995-2026 Jean-loup Gailly and Mark Adler
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+  Jean-loup Gailly        Mark Adler
+  jloup@gzip.org          madler@alumni.caltech.edu
+
+----------------------------------------------------------------------
+bzip2  (https://sourceware.org/bzip2/)  — bzip2 licence (BSD-style)
+----------------------------------------------------------------------
+bzip2 1.0.8, part of vendor/libarchive/libarchive.wasm.
+
+This program, "bzip2", the associated library "libbzip2", and all
+documentation, are copyright (C) 1996-2019 Julian R Seward.  All
+rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. The origin of this software must not be misrepresented; you must 
+   not claim that you wrote the original software.  If you use this 
+   software in a product, an acknowledgment in the product 
+   documentation would be appreciated but is not required.
+
+3. Altered source versions must be plainly marked as such, and must
+   not be misrepresented as being the original software.
+
+4. The name of the author may not be used to endorse or promote 
+   products derived from this software without specific prior written 
+   permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Julian Seward, jseward@acm.org
+bzip2/libbzip2 version 1.0.8 of 13 July 2019
+
+--------------------------------------------------------------------------
+
+----------------------------------------------------------------------
+XZ Utils, liblzma  (https://tukaani.org/xz/)  — 0BSD
+----------------------------------------------------------------------
+liblzma from XZ Utils 5.8.4, part of vendor/libarchive/libarchive.wasm. Only
+liblzma is included; it is under the BSD Zero Clause License.
+
+Copyright (C) The XZ Utils authors and contributors
+
+Permission to use, copy, modify, and/or distribute this
+software for any purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+----------------------------------------------------------------------
+Emscripten runtime  (https://emscripten.org)  — MIT / NCSA, MIT,
+Apache-2.0 with LLVM exceptions
+----------------------------------------------------------------------
+The three WebAssembly modules are compiled with Emscripten 7.0.0, which
+links parts of its own runtime into each of them and generates the loader
+that ships beside each (unarr-rar.mjs, sevenzip.mjs, and the loader inside
+vendor/libarchive/worker-bundle.js):
+
+  Emscripten's runtime and generated loader
+      Copyright (c) 2010-2014 Emscripten authors. Available under the MIT
+      licence and the University of Illinois/NCSA Open Source License; both
+      texts are in licences/Emscripten-LICENSE.txt.
+
+  musl, the C library, in all three modules
+      Copyright (c) 2005-2020 Rich Felker, et al. MIT licence, with parts
+      under other permissive terms; the full statement is in
+      licences/musl-COPYRIGHT.txt.
+
+  LLVM runtime libraries: compiler-rt in unarr-rar.wasm and
+  libarchive.wasm; libc++, libc++abi and libunwind in sevenzip.wasm (the
+  C++ module)
+      Apache License 2.0 with LLVM Exceptions, with older parts under the
+      MIT and NCSA licences; the text is in licences/LLVM-LICENSE.txt. That
+      file is libc++'s copy; the other libraries' copies differ from it
+      only in the library they name.
+
+  dlmalloc, the memory allocator, in all three modules
+      By Doug Lea; released to the public domain (CC0).
+

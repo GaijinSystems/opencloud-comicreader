@@ -1,0 +1,48 @@
+{
+  "name": "comic-reader",
+  "version": "1.2.2",
+  "description": "Read CBZ, CBR, CB7 and C7Z comic archives directly in OpenCloud Web.",
+  "license": "AGPL-3.0-or-later",
+  "author": "GaijinSystems",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run prepare:decoders && vite build && node scripts/prune-dist.mjs",
+    "build:w": "npm run prepare:decoders && vite build --watch --mode development",
+    "dev": "npm run prepare:decoders && vite",
+    "check:types": "vue-tsc --noEmit",
+    "test:unit": "vitest run --mode test",
+    "test:unit:w": "vitest --mode test",
+    "fixtures": "python3 scripts/make-fixtures.py",
+    "verify:libarchive": "npm run prepare:decoders && node scripts/verify-libarchive.mjs",
+    "verify:formats": "npm run prepare:decoders && node scripts/verify-formats.mjs",
+    "fixtures:formats": "python3 scripts/make-format-matrix.py",
+    "build:unarr": "sh scripts/build-unarr.sh",
+    "build:libarchive": "sh scripts/build-libarchive.sh",
+    "build:sevenzip": "sh scripts/build-sevenzip.sh",
+    "build:native": "npm run build:unarr && npm run build:libarchive && npm run build:sevenzip",
+    "prepare:decoders": "node scripts/prepare-decoders.mjs"
+  },
+  "dependencies": {
+    "@zip.js/zip.js": "^2.15.0",
+    "libarchive.js": "2.0.2"
+  },
+  "devDependencies": {
+    "@opencloud-eu/design-system": "^8.2.2",
+    "@opencloud-eu/extension-sdk": "^8.0.0",
+    "@opencloud-eu/tsconfig": "^8.0.0",
+    "@opencloud-eu/web-client": "^8.0.0",
+    "@opencloud-eu/web-pkg": "^8.0.0",
+    "@types/node": "^24.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.0.0",
+    "rolldown": "^1.2.19",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.0",
+    "vitest": "^4.0.0",
+    "vue": "^3.5.13",
+    "vue-router": "^5.0.0",
+    "vue-tsc": "^3.0.0",
+    "vue3-gettext": "^4.0.0-beta.1"
+  }
+}

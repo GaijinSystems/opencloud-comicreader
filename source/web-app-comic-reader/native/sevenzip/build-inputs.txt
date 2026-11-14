@@ -1,0 +1,4 @@
+native/sevenzip/build.sh
+native/sevenzip/glue.cpp
+native/sevenzip/sources.sha256
+scripts/lib/emsdk.sh

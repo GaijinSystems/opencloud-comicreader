@@ -1,0 +1,6 @@
+native/libarchive/build.sh
+native/libarchive/sources.sha256
+native/libarchive/libarchivejs/main.c
+native/libarchive/libarchivejs/lib.exports
+scripts/lib/emsdk.sh
+native/libarchive/patches/stored-entry-checksums.patch

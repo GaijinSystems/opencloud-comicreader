@@ -1,0 +1,35 @@
+--- a/libarchive/archive_read_support_format_rar.c
++++ b/libarchive/archive_read_support_format_rar.c
+@@ -1113,7 +1113,13 @@
+   }
+ 
+   *buff = NULL;
+-  if (rar->entry_eof || rar->offset_seek >= rar->unp_size) {
++  /* Comic Reader: a stored entry that has been read to its end goes on to
++   * read_data_stored, which is where its checksum is compared. It used to
++   * be answered here, as every entry read to its declared size is, and
++   * the comparison was never reached. */
++  if (rar->entry_eof || (rar->offset_seek >= rar->unp_size &&
++      !(rar->compression_method == COMPRESS_METHOD_STORE &&
++        rar->bytes_remaining == 0))) {
+     *size = 0;
+     *offset = rar->offset;
+     return (ARCHIVE_EOF);
+--- a/libarchive/archive_read_support_format_rar5.c
++++ b/libarchive/archive_read_support_format_rar5.c
+@@ -4264,6 +4264,15 @@
+ 
+ 	to_read = rar5_min(rar5->file.bytes_remaining, 64 * 1024);
+ 	if(to_read == 0) {
++		/* Comic Reader: the end of a stored entry is where its
++		 * checksum is compared, once. It was compared nowhere:
++		 * rar5_read_data does it for data that was unpacked, and
++		 * stored data does not come that way. */
++		if(rar5->file.eof == 0) {
++			rar5->file.eof = 1;
++			if(verify_global_checksums(a) != ARCHIVE_OK)
++				return ARCHIVE_FAILED;
++		}
+ 		return ARCHIVE_EOF;
+ 	}
+ 

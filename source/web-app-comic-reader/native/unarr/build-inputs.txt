@@ -1,0 +1,4 @@
+native/unarr/build.sh
+native/unarr/glue.c
+native/unarr/upstream.sha256
+scripts/lib/emsdk.sh

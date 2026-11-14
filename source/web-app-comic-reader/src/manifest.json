@@ -1,0 +1,16 @@
+{
+  "config": {
+    "registerAsDefault": true,
+    "maxArchiveSizeMb": 1024,
+    "rangeThresholdMb": 8,
+    "bulkExtractLimitMb": 256,
+    "cacheRadius": 8,
+    "prefetchPages": 3,
+    "maxPages": 5000,
+    "maxPageSizeMb": 64,
+    "defaultFitMode": "fit-page",
+    "defaultSpread": "auto",
+    "enableJxl": false,
+    "rememberPosition": true
+  }
+}

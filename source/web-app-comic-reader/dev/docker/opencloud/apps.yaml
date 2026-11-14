@@ -1,0 +1,6 @@
+comic-reader:
+  config:
+    # Smaller limits in dev so the guard paths are easy to exercise.
+    maxArchiveSizeMb: 512
+    rangeThresholdMb: 2
+    defaultSpread: auto
