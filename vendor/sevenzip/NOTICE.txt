@@ -1,5 +1,5 @@
-7-Zip's 7z reader and decryption routines for Comic Reader
-==========================================================
+7-Zip's 7z reader and decryption routines for OpenCloud Comic Reader
+====================================================================
 
 What is in this folder
 
@@ -7,12 +7,13 @@ What is in this folder
                         reader, and its decryption routines for RAR and
                         for zip's AES.
   sevenzip.mjs          The loader Emscripten generates for it.
-  sevenzip-extract.mjs  Comic Reader's extraction loop for 7z
+  sevenzip-extract.mjs  OpenCloud Comic Reader's extraction loop for 7z
                         (AGPL-3.0-or-later).
-  decrypt-rar.mjs       Comic Reader's code that turns an encrypted RAR
-  decrypt-zip.mjs       archive, or an AES-encrypted zip, into the same
-  decrypt-common.mjs    archive without the encryption (AGPL-3.0-or-later).
-  sevenzip-worker.mjs   Comic Reader's worker around them
+  decrypt-rar.mjs       OpenCloud Comic Reader's code that turns an
+  decrypt-zip.mjs       encrypted RAR archive, or an AES-encrypted zip,
+  decrypt-common.mjs    into the same archive without the encryption
+                        (AGPL-3.0-or-later).
+  sevenzip-worker.mjs   OpenCloud Comic Reader's worker around them
                         (AGPL-3.0-or-later).
   License.txt           7-Zip's licence notice (DOC/License.txt).
   copying.txt           GNU Lesser General Public License, version 2.1
@@ -57,11 +58,11 @@ Source and rebuilding
   The source is 7z2606-src.tar.xz from
   https://github.com/ip7z/7zip/releases/download/26.06/7z2606-src.tar.xz
   (SHA-256 a4e374c8f864f51df48c2cfd0e1413ec3b2ea030deae852d6a655402ebb61ac4).
-  Comic Reader's source package holds, under native/sevenzip/, that address
-  and hash (sources.txt, sources.sha256), the small C++ interface compiled
-  with the 7-Zip sources (glue.cpp) and the build script (build.sh), which
-  lists every file compiled. `sh scripts/build-sevenzip.sh` downloads the
-  tarball, checks it and builds both files with the Emscripten SDK 7.0.0
+  OpenCloud Comic Reader's source package holds, under native/sevenzip/, that
+  address and hash (sources.txt, sources.sha256), the small C++ interface
+  compiled with the 7-Zip sources (glue.cpp) and the build script (build.sh),
+  which lists every file compiled. `sh scripts/build-sevenzip.sh` downloads
+  the tarball, checks it and builds both files with the Emscripten SDK 7.0.0
   container, pinned by digest. The build is reproducible, so the copies in
   this folder should be:
 

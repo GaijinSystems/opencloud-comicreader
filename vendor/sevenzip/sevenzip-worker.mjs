@@ -1,7 +1,7 @@
 /*
- * Comic Reader — worker around the sevenzip module: 7-Zip's 7z reader, and
- * its decryption routines for RAR and for zip's AES.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
+ * OpenCloud Comic Reader — worker around the sevenzip module: 7-Zip's 7z
+ * reader, and its decryption routines for RAR and for zip's AES.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
  *
  * One archive per worker: the page terminates it afterwards, which is also
  * what returns the WebAssembly heap to the system (and with it the password

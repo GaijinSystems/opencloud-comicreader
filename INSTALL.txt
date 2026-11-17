@@ -1,5 +1,5 @@
-Comic Reader for OpenCloud Web — v1.2.2
-=======================================
+OpenCloud Comic Reader — v1.2.3
+===============================
 
 Reads .cbz, .cbr, .cb7 and .c7z comic archives in the OpenCloud file manager.
 
@@ -58,9 +58,9 @@ script-src, because the decoders are WebAssembly:
                        WebAssembly and nothing else; it does not allow
                        eval() or new Function().
 
-That is the only change. In particular the app does NOT need 'unsafe-eval'.
-If an earlier version of Comic Reader had you add it for solid RAR, you can
-remove it again.
+That is the only change. In particular the app does NOT need 'unsafe-eval'. If
+an earlier version of OpenCloud Comic Reader had you add it for solid RAR, you
+can remove it again.
 
 A reverse proxy in front of OpenCloud can instead append the keyword to the
 script-src of the policy OpenCloud sends, so that later changes to that
@@ -165,9 +165,9 @@ LICENCE
 -------
 Copyright (C) 2026 GaijinSystems.
 
-Comic Reader is free software, licensed under the GNU Affero General Public
-License, version 3 or (at your option) any later version. The full text is in
-LICENSE alongside this file.
+OpenCloud Comic Reader is free software, licensed under the GNU Affero General
+Public License, version 3 or (at your option) any later version. The full text
+is in LICENSE alongside this file.
 
 Bundled third-party components, their licences and where to find their source
 are listed in THIRD-PARTY-NOTICES.txt.

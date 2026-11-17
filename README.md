@@ -1,8 +1,8 @@
-# Comic Reader for OpenCloud: live demo
+# OpenCloud Comic Reader: live demo
 
-This branch is the site at <https://comicreader.gaijin.systems>: Comic
-Reader, the comic book reader app for OpenCloud Web, running on its own in
-the browser on a mock file list, with a few made-up comics. The app itself,
+This branch is the site at <https://comicreader.gaijin.systems>: OpenCloud
+Comic Reader, the comic book reader app for OpenCloud Web, running on its own
+in the browser on a mock file list, with a few made-up comics. The app itself,
 and its documentation, are on the
 [main branch](https://github.com/GaijinSystems/opencloud-comicreader).
 

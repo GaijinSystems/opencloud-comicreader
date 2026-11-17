@@ -4,7 +4,7 @@
       <header class="demo-top">
         <div class="demo-brand">
           <oc-icon name="book-read" fill-type="line" />
-          <span>Comic Reader <span class="demo-muted">for OpenCloud</span></span>
+          <span>OpenCloud Comic Reader</span>
         </div>
         <a class="demo-link" :href="repository" rel="noopener">
           <oc-icon name="github" fill-type="fill" size="small" />
@@ -57,7 +57,7 @@
         </section>
 
         <p class="demo-muted demo-small">
-          Comic Reader is free software under the GNU AGPL, version 3 or later. Its decoders'
+          OpenCloud Comic Reader is free software under the GNU AGPL, version 3 or later. Its decoders'
           licences are in <a :href="`${base}THIRD-PARTY-NOTICES.txt`">THIRD-PARTY-NOTICES.txt</a>.
           This demo stands in for OpenCloud: the real thing opens comics from your own files.
         </p>
@@ -168,11 +168,6 @@ body {
   gap: 10px;
   font-size: 1.15rem;
   font-weight: 600;
-}
-.demo-top .demo-muted {
-  color: inherit;
-  opacity: 0.75;
-  font-weight: 400;
 }
 .demo-link {
   display: flex;

@@ -58,6 +58,10 @@ fi
   rm -rf demo/make-comics
   node scripts/prepare-decoders.mjs
   npx vite build --config vite.demo.config.ts --logLevel warn
+  # Nothing on the site is executable, whatever modes the source has (the
+  # artifact the release workflow builds it into keeps no modes either).
+  find demo-dist -type d -exec chmod 755 {} +
+  find demo-dist -type f -exec chmod 644 {} +
   # Swap the previous build for this one; keep what is not built. (The demo
   # job in .github/workflows/release.yml on main keeps the same files.)
   [ -n "$OUT" ] || find /site -mindepth 1 -maxdepth 1 ! -name _demo ! -name README.md \

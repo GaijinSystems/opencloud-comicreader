@@ -1,6 +1,6 @@
 /*
- * Comic Reader — extraction loop over the unarr RAR module.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of unarr.
+ * OpenCloud Comic Reader — extraction loop over the unarr RAR module.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of unarr.
  *
  * Shipped as a plain module rather than bundled, so the worker beside it can
  * import it directly. scripts/verify-formats.mjs and the unit tests import the

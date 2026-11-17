@@ -1,12 +1,14 @@
-unarr RAR decoder for Comic Reader
-==================================
+unarr RAR decoder for OpenCloud Comic Reader
+============================================
 
 What is in this folder
 
   unarr-rar.wasm      unarr's RAR reader compiled to WebAssembly.
   unarr-rar.mjs       The loader Emscripten generates for it.
-  unarr-extract.mjs   Comic Reader's extraction loop (AGPL-3.0-or-later).
-  unarr-worker.mjs    Comic Reader's worker around it (AGPL-3.0-or-later).
+  unarr-extract.mjs   OpenCloud Comic Reader's extraction loop
+                      (AGPL-3.0-or-later).
+  unarr-worker.mjs    OpenCloud Comic Reader's worker around it
+                      (AGPL-3.0-or-later).
   COPYING.LESSER      GNU Lesser General Public License, version 3.
   COPYING             GNU General Public License, version 3, which the
                       Lesser GPL incorporates by reference.
@@ -21,14 +23,14 @@ unarr
   GNUnet (crc32), both of which are in the public domain.
 
   Only the RAR reader is compiled in: common/, rar/ and the PPMd parts of
-  lzmasdk/, with a small interface of Comic Reader's own (glue.c). unarr's
-  sources are unmodified; native/unarr/upstream.sha256 in the
-  source package lists the hash of every file, for comparison with a
-  checkout of that commit.
+  lzmasdk/, with a small interface of OpenCloud Comic Reader's own (glue.c).
+  unarr's sources are unmodified; native/unarr/upstream.sha256 in the source
+  package lists the hash of every file, for comparison with a checkout of that
+  commit.
 
 Source and rebuilding
 
-  The complete corresponding source is part of Comic Reader's source
+  The complete corresponding source is part of OpenCloud Comic Reader's source
   package, under native/unarr/: the unarr sources used (upstream/), the
   small C interface compiled with them (glue.c) and the build script
   (build.sh). `sh scripts/build-unarr.sh` builds both files from them with

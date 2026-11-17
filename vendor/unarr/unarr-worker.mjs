@@ -1,6 +1,6 @@
 /*
- * Comic Reader — worker that decodes one RAR4 archive with unarr.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of unarr.
+ * OpenCloud Comic Reader — worker that decodes one RAR4 archive with unarr.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of unarr.
  *
  * One archive per worker: the page terminates it afterwards, which is also
  * what returns the WebAssembly heap to the system, and is how a decode that

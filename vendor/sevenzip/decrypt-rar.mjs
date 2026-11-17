@@ -1,7 +1,7 @@
 /*
- * Comic Reader — turns a password-protected RAR archive into the same
+ * OpenCloud Comic Reader — turns a password-protected RAR archive into the same
  * archive without the encryption.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
  *
  * The reader's RAR decoders (libarchive, unarr) decompress RAR and do not
  * decrypt it. So an encrypted RAR is decrypted here first: the container is
