@@ -28,7 +28,7 @@ rejects.
 ## Upgrading from 1.1.2 or earlier
 
 Those versions used RARLAB's UnRAR for solid RAR4, which needed `'unsafe-eval'`
-in `script-src`. If you added it for Comic Reader, remove it:
+in `script-src`. If you added it for OpenCloud Comic Reader, remove it:
 
 - HAProxy: delete the second `http-response replace-header` rule and the
   `csp_has_eval` acl that came with the old snippet.
@@ -54,7 +54,7 @@ so the old `vendor/unrar/` does not linger.
 
 ## Licence
 
-unarr is LGPL-3.0, which is compatible with Comic Reader's AGPL-3.0-or-later,
-so the build is freely redistributable. Its source and the script that builds
-the WebAssembly module from it are in `native/unarr/` in the source package;
-see `vendor/unarr/NOTICE.txt`.
+unarr is LGPL-3.0, which is compatible with OpenCloud Comic Reader's
+AGPL-3.0-or-later, so the build is freely redistributable. Its source and the
+script that builds the WebAssembly module from it are in `native/unarr/` in the
+source package; see `vendor/unarr/NOTICE.txt`.

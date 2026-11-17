@@ -1,7 +1,7 @@
 /*
- * Comic Reader — turns a zip whose entries are encrypted with WinZip AES
- * into the same zip without the encryption.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
+ * OpenCloud Comic Reader — turns a zip whose entries are encrypted with WinZip
+ * AES into the same zip without the encryption.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
  *
  * zip.js decrypts AES, and decodes stored, deflate and deflate64. libarchive
  * decodes bzip2, LZMA and PPMd, and cannot undo AES (it is built without a

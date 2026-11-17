@@ -1,4 +1,4 @@
-# Comic Reader for OpenCloud Web
+# OpenCloud Comic Reader
 
 Opens `.cbz`, `.cbr`, `.cb7` and `.c7z` comic archives directly in the
 OpenCloud file manager. Click a comic, it opens in a reader.
@@ -55,7 +55,7 @@ made and a hash of its code, in the form `2026-11-13+a1B2c3D4`.
 
 ## Quick start
 
-Comic Reader needs OpenCloud 6.0.0 or newer.
+OpenCloud Comic Reader needs OpenCloud 6.0.0 or newer.
 
 **1. Get the app**
 
@@ -63,8 +63,8 @@ Download `comic-reader-<version>.tar.gz` and its `.sha256` file from the
 [latest release](https://github.com/GaijinSystems/opencloud-comicreader/releases/latest),
 check the download, and unpack it:
 
-    sha256sum -c comic-reader-1.2.2.tar.gz.sha256
-    tar -xzf comic-reader-1.2.2.tar.gz
+    sha256sum -c comic-reader-1.2.3.tar.gz.sha256
+    tar -xzf comic-reader-1.2.3.tar.gz
 
 That gives a folder named `comic-reader`, which is the app. Its `SHA256SUMS`
 lists the hash of every other file in it, for checking an installed copy
@@ -291,12 +291,12 @@ running the checks and the ground rules for changes.
 
 Copyright (C) 2026 GaijinSystems.
 
-Comic Reader is free software: you can redistribute it and/or modify it under
-the terms of the GNU Affero General Public License as published by the Free
-Software Foundation, either version 3 of the License, or (at your option) any
-later version. It comes with no warranty. If you run a modified version for
-other people to use over a network, the license requires you to offer them
-its source. The full text is in `LICENSE`.
+OpenCloud Comic Reader is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version. It comes with no warranty. If you run a modified version for
+other people to use over a network, the license requires you to offer them its
+source. The full text is in `LICENSE`.
 
 It bundles zip.js (BSD-3-Clause), libarchive.js (MIT) with Comlink
 (Apache-2.0), libarchive (BSD-2-Clause) built with zlib, liblzma (0BSD) and

@@ -1,8 +1,8 @@
 /*
- * Comic Reader — what decrypt-rar.mjs and decrypt-zip.mjs share: reading
- * and writing little-endian fields, the decryption routines of the sevenzip
- * module, and the archive being written.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
+ * OpenCloud Comic Reader — what decrypt-rar.mjs and decrypt-zip.mjs share:
+ * reading and writing little-endian fields, the decryption routines of the
+ * sevenzip module, and the archive being written.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
  *
  * Files in this directory are loaded with a version query and so do not
  * import one another (scripts/prune-dist.mjs checks). Whoever loads the two

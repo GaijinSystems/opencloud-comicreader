@@ -2,10 +2,10 @@
 
 ## Where this runs
 
-**Comic Reader runs entirely in the browser, inside OpenCloud Web.** It has no server part of
-its own. OpenCloud loads it into its own page, so it runs with the same origin and the same
-session as the rest of OpenCloud: whatever the signed-in user (or the holder of a public link)
-may read, the reader may read.
+**OpenCloud Comic Reader runs entirely in the browser, inside OpenCloud Web.** It has no server
+part of its own. OpenCloud loads it into its own page, so it runs with the same origin and the
+same session as the rest of OpenCloud: whatever the signed-in user (or the holder of a public
+link) may read, the reader may read.
 
 Two things follow from that:
 

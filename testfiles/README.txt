@@ -1,5 +1,5 @@
-Comic Reader — test files
-=========================
+OpenCloud Comic Reader — test files
+===================================
 
 Four archives, identical contents, one per supported format. Upload them to
 OpenCloud and click each one.

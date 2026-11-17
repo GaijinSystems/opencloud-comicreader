@@ -1,9 +1,9 @@
 THIRD-PARTY NOTICES
 ===================
 
-Comic Reader includes the following third-party software. Each licence
-requires that its notice accompany binary distributions, which is why this
-file ships inside the app folder.
+OpenCloud Comic Reader includes the following third-party software. Each
+licence requires that its notice accompany binary distributions, which is why
+this file ships inside the app folder.
 
 Three WebAssembly modules are part of the app. All are built from source when
 the app is built, by the scripts in native/ of the source package, and all
@@ -114,7 +114,7 @@ unmodified sources together with a small interface of this app's own
 The licence texts are in vendor/unarr/COPYING.LESSER (LGPL version 3) and
 vendor/unarr/COPYING (GPL version 3, which the LGPL incorporates). The
 complete corresponding source, with the script that rebuilds these two files
-from it, is in Comic Reader's source package under native/unarr/. See
+from it, is in OpenCloud Comic Reader's source package under native/unarr/. See
 vendor/unarr/NOTICE.txt.
 
 ----------------------------------------------------------------------
@@ -148,10 +148,10 @@ BSD-licensed LZFSE, Zstandard and xxHash parts included.
 7-Zip's licence notice is in vendor/sevenzip/License.txt and the licence
 text in vendor/sevenzip/copying.txt (GNU LGPL version 2.1). The source is the
 7-Zip 26.06 source release (7z2606-src.tar.xz, SHA-256
-a4e374c8f864f51df48c2cfd0e1413ec3b2ea030deae852d6a655402ebb61ac4); Comic
-Reader's source package holds, under native/sevenzip/, where to get it, the
-small interface compiled with it, and the script that rebuilds these two
-files from it. See vendor/sevenzip/NOTICE.txt.
+a4e374c8f864f51df48c2cfd0e1413ec3b2ea030deae852d6a655402ebb61ac4);
+OpenCloud Comic Reader's source package holds, under native/sevenzip/, where
+to get it, the small interface compiled with it, and the script that rebuilds
+these two files from it. See vendor/sevenzip/NOTICE.txt.
 
 ----------------------------------------------------------------------
 libarchive  (https://www.libarchive.org)  — BSD-2-Clause

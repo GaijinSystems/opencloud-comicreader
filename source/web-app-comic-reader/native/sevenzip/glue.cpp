@@ -1,6 +1,6 @@
 /*
  * Thin C surface over 7-Zip's 7z reader for use from JavaScript.
- * Part of Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
+ * Part of OpenCloud Comic Reader, AGPL-3.0-or-later. Not part of 7-Zip.
  *
  * Plain exported functions and four imported ones: no Embind, so the
  * generated loader never builds code from strings and needs no 'unsafe-eval'

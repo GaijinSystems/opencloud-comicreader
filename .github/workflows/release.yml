@@ -4,7 +4,8 @@
 #
 # Releasing: in one commit, set the version in source/web-app-comic-reader/package.json and
 # package-lock.json (npm version 1.2.3 --no-git-tag-version), on the first line of
-# public/INSTALL.txt, and as a "## 1.2.3 — <date>" section of CHANGELOG.md.
+# public/INSTALL.txt, in the download commands in README.md, and as a "## 1.2.3 — <date>"
+# section of CHANGELOG.md (copied to docs/CHANGELOG.md).
 # `sh scripts/release-notes.sh` checks that they agree, as every run of this workflow does.
 # Push main, then:
 #     git tag v1.2.3 && git push origin v1.2.3
@@ -162,7 +163,7 @@ jobs:
           [ "$(tar -xzOf "release/$name" comic-reader/manifest.json | jq -r .version)" = "$version" ] \
             || { echo "::error::the package's manifest.json is not at version $version"; exit 1; }
           gh release create "$GITHUB_REF_NAME" "release/$name" "release/$name.sha256" \
-            --verify-tag --title "Comic Reader $version" --notes-file notes.md
+            --verify-tag --title "OpenCloud Comic Reader $version" --notes-file notes.md
 
   # Puts the built site on gh-pages and publishes it. Runs no downloaded code, and none from
   # gh-pages either.
@@ -233,7 +234,7 @@ jobs:
             exit 0
           fi
           safe -c user.name=GaijinSystems -c user.email=17348508+GaijinSystems@users.noreply.github.com \
-            commit -q -m "Demo site, built from Comic Reader ${GITHUB_REF_NAME#v}"
+            commit -q -m "Demo site, built from OpenCloud Comic Reader ${GITHUB_REF_NAME#v}"
           safe push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:gh-pages
       - name: Publish and check the site
         if: steps.newest.outputs.publish

@@ -9,13 +9,14 @@
 #define EMSCRIPTEN_KEEPALIVE
 
 /*
- * Changes made for Comic Reader are marked "Comic Reader:" and described in
- * ../README.md. Everything else is libarchive.js 2.0.2's main.c.
+ * Changes made for OpenCloud Comic Reader are marked "OpenCloud Comic Reader:"
+ * and described in ../README.md. Everything else is libarchive.js 2.0.2's
+ * main.c.
  */
 
-/* Comic Reader: the reader archive_open last returned, so the next call can
-   free it. libarchive.js's worker opens one per listing and per file read
-   and frees only the last. */
+/* OpenCloud Comic Reader: the reader archive_open last returned, so the next
+   call can free it. libarchive.js's worker opens one per listing and per file
+   read and frees only the last. */
 static struct archive *cr_current = NULL;
 
 EMSCRIPTEN_KEEPALIVE
@@ -27,8 +28,8 @@ EMSCRIPTEN_KEEPALIVE
 void *archive_open(const void *buf, size_t size, const char *passphrase, const char *locale){
   struct archive *a;
   int r;
-  /* Comic Reader: a locale ending in this asks for zip checksums not to be
-     compared (see below). The page's API has no other way to pass an
+  /* OpenCloud Comic Reader: a locale ending in this asks for zip checksums not
+     to be compared (see below). The page's API has no other way to pass an
      option through to here. */
   static const char cr_unchecked[] = "@zip-unchecked";
   char cr_locale[64];
@@ -46,7 +47,8 @@ void *archive_open(const void *buf, size_t size, const char *passphrase, const c
 
   setlocale(LC_ALL, locale);
 
-  /* Comic Reader: the worker is done with the previous reader by now. */
+  /* OpenCloud Comic Reader: the worker is done with the previous reader
+     by now. */
   if (cr_current)
   {
     archive_read_free(cr_current);
@@ -54,8 +56,8 @@ void *archive_open(const void *buf, size_t size, const char *passphrase, const c
   }
 
   a = archive_read_new();
-  /* Comic Reader: the containers a comic comes in, and no others; upstream
-     enables every filter and format (tar, cpio, ISO images, ...). */
+  /* OpenCloud Comic Reader: the containers a comic comes in, and no others;
+     upstream enables every filter and format (tar, cpio, ISO images, ...). */
   archive_read_support_format_rar(a);
   archive_read_support_format_rar5(a);
   archive_read_support_format_7zip(a);
@@ -66,10 +68,10 @@ void *archive_open(const void *buf, size_t size, const char *passphrase, const c
     archive_read_add_passphrase(a, passphrase);
   }
 
-  /* Comic Reader: for a zip whose entries were AES-encrypted and have been
-     decrypted by the app. The second version of that scheme stores no
-     checksum (each entry carries an authentication code instead, which the
-     app has checked), so the decrypted zip has none to compare. */
+  /* OpenCloud Comic Reader: for a zip whose entries were AES-encrypted and have
+     been decrypted by the app. The second version of that scheme stores no
+     checksum (each entry carries an authentication code instead, which the app
+     has checked), so the decrypted zip has none to compare. */
   if (cr_skip_zip_checksums)
   {
     archive_read_set_options(a, "zip:ignorecrc32");
@@ -81,7 +83,7 @@ void *archive_open(const void *buf, size_t size, const char *passphrase, const c
     fprintf(stderr, "Memory read error %d\n", r);
     fprintf(stderr, "%s\n", archive_error_string(a));
   }
-  cr_current = a; /* Comic Reader */
+  cr_current = a; /* OpenCloud Comic Reader */
   return a;
 }
 
@@ -100,18 +102,19 @@ const void *get_next_entry(void *archive){
 
 EMSCRIPTEN_KEEPALIVE
 void *get_filedata(void *archive, size_t buffsize){
-  /* Comic Reader: zeroed, so a read shorter than the declared size does not
-     hand back whatever the heap held; and checked, which it was not. */
+  /* OpenCloud Comic Reader: zeroed, so a read shorter than the declared size
+     does not hand back whatever the heap held; and checked, which it was
+     not. */
   void *buff = calloc(1, buffsize);
   if (!buff) return (void *)-1;
   int read_size = archive_read_data(archive, buff, buffsize);
-  /* Comic Reader: read on to the end of the entry. libarchive compares an
-     entry's checksum at or after its last data (for RAR, on the read that
-     finds nothing left), and upstream, having asked for exactly the
-     declared size, did not always get there: a damaged entry came back as
-     if it were sound. Not for an entry that declares nothing: there is
-     nothing to hand back wrong, and a directory must not be read at all.
-     More data than was declared is left alone, as before. */
+  /* OpenCloud Comic Reader: read on to the end of the entry. libarchive
+     compares an entry's checksum at or after its last data (for RAR, on the
+     read that finds nothing left), and upstream, having asked for exactly the
+     declared size, did not always get there: a damaged entry came back as if it
+     were sound. Not for an entry that declares nothing: there is nothing to
+     hand back wrong, and a directory must not be read at all. More data than
+     was declared is left alone, as before. */
   if (read_size >= 0 && buffsize > 0)
   {
     char past;
@@ -119,7 +122,7 @@ void *get_filedata(void *archive, size_t buffsize){
   }
   if (read_size < 0)
   {
-    free(buff); /* Comic Reader: was leaked */
+    free(buff); /* OpenCloud Comic Reader: was leaked */
     fprintf(stderr, "Error occured while reading file");
     return (void *)read_size;
   }
@@ -128,15 +131,15 @@ void *get_filedata(void *archive, size_t buffsize){
 
 EMSCRIPTEN_KEEPALIVE
 void archive_close(void *archive){
-  /* Comic Reader: only the current reader is live; any other handle was
-     freed when it was replaced. */
+  /* OpenCloud Comic Reader: only the current reader is live; any other handle
+     was freed when it was replaced. */
   if (archive != cr_current) return;
   cr_current = NULL;
   int r = archive_read_free(archive);
   if (r != ARCHIVE_OK)
   {
-    /* Comic Reader: upstream also printed the error string of the reader
-       it had just freed. */
+    /* OpenCloud Comic Reader: upstream also printed the error string of the
+       reader it had just freed. */
     fprintf(stderr, "Error read free %d\n", r);
   }
 }

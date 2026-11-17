@@ -1,4 +1,4 @@
-# Comic Reader for OpenCloud Web
+# OpenCloud Comic Reader
 
 Opens `.cbz`, `.cbr`, `.cb7` and `.c7z` comic archives directly in the OpenCloud
 file manager. Click a comic and it opens in a reader: no download, no desktop
@@ -618,10 +618,10 @@ on against real CBR, CB7 and C7Z archives.
 
 Copyright (C) 2026 GaijinSystems.
 
-Comic Reader is free software: you can redistribute it and/or modify it under
-the terms of the GNU Affero General Public License as published by the Free
-Software Foundation, either version 3 of the License, or (at your option) any
-later version. It is distributed in the hope that it will be useful, but
+OpenCloud Comic Reader is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version. It is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See `LICENSE` for the full text.
 

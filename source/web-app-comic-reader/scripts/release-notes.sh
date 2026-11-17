@@ -6,8 +6,10 @@
 #   sh scripts/release-notes.sh > /dev/null # only check
 #
 # The version is set in package.json and package-lock.json, on the first line
-# of public/INSTALL.txt (ending in " v1.2.3"), and as a CHANGELOG.md section
-# whose heading is "## 1.2.3", optionally followed by a space and a date.
+# of public/INSTALL.txt (ending in " v1.2.3"), in the download commands in the
+# repository's README.md, and as a CHANGELOG.md section whose heading is
+# "## 1.2.3", optionally followed by a space and a date; docs/CHANGELOG.md in
+# the repository is a copy of CHANGELOG.md.
 # Run it before tagging a release: .github/workflows/release.yml runs it on
 # every push, and takes the release notes from it.
 set -eu
@@ -32,6 +34,23 @@ case "$(head -n 1 public/INSTALL.txt)" in
   *" v$version") ;;
   *) fail "the first line of public/INSTALL.txt does not end in v$version" ;;
 esac
+
+# The repository around this folder: the README's download commands name the
+# file, every one of them, and docs/ holds copies of the changelog and of
+# docs/solid-rar.md. A copy of this folder on its own (the source package), or
+# one placed in another repository, has none of it.
+if [ -f ../../docs/CHANGELOG.md ] && [ -f ../../.github/workflows/release.yml ]; then
+  others=$(grep -o 'comic-reader-[0-9][0-9.]*[0-9]\.tar\.gz' ../../README.md | grep -vxF "comic-reader-$version.tar.gz" || true)
+  if [ -n "$others" ] || ! grep -qF "comic-reader-$version.tar.gz" ../../README.md; then
+    fail "README.md's download commands do not all name comic-reader-$version.tar.gz"
+  fi
+  cmp -s CHANGELOG.md ../../docs/CHANGELOG.md ||
+    fail "docs/CHANGELOG.md differs from $PWD/CHANGELOG.md; copy it over"
+  cmp -s docs/solid-rar.md ../../docs/solid-rar.md ||
+    fail "$PWD/docs/solid-rar.md differs from the repository's docs/solid-rar.md"
+else
+  echo "release-notes: not inside the repository; README.md and docs/ not checked" >&2
+fi
 
 notes=$(awk -v v="## $version" '
   index($0, v) == 1 && (length($0) == length(v) || substr($0, length(v) + 1, 1) == " ") {on = 1; found = 1; next}

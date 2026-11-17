@@ -24,7 +24,7 @@ RAR is refused.
 | --- | --- |
 | `sources.txt` | Where the four release tarballs come from: libarchive 3.8.11, zlib 1.4, XZ Utils 5.8.4 (for liblzma) and bzip2 1.0.8. |
 | `sources.sha256` | The SHA-256 each download must have. Anything else is refused. |
-| `libarchivejs/main.c`, `lib.exports` | libarchive.js 2.0.2's C wrapper and its list of exported functions (MIT; see `libarchivejs/LICENSE`). This is the interface its worker calls. `lib.exports` is unchanged; `main.c` has seven changes, each marked `Comic Reader:` in the file and listed below. |
+| `libarchivejs/main.c`, `lib.exports` | libarchive.js 2.0.2's C wrapper and its list of exported functions (MIT; see `libarchivejs/LICENSE`). This is the interface its worker calls. `lib.exports` is unchanged; `main.c` has seven changes, each marked `OpenCloud Comic Reader:` in the file and listed below. |
 | `patches/` | This app's changes to libarchive's own sources, applied to the unpacked tarball before it is compiled. One so far; see below. |
 | `build.sh` | The compile commands. Runs inside the Emscripten container, without network access. |
 | `build-inputs.txt` | The files the output depends on, including the pinned compiler in `scripts/lib/emsdk.sh`. Their hashes make up the build stamp. |
@@ -63,7 +63,7 @@ lets such a build through with a warning.
 ## Changes to libarchive
 
 `patches/stored-entry-checksums.patch`, two changes, each marked
-`Comic Reader:` in the source it adds to.
+`OpenCloud Comic Reader:` in the source it adds to.
 
 libarchive 3.8.11 does not compare the checksum of a RAR entry that is
 stored (not compressed). In the RAR reader, a read at the end of an entry

@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.2.3 — 2026-11-17
+
+The project is now called OpenCloud Comic Reader. The reader itself is
+unchanged from 1.2.2.
+
+### Changed
+- **The name.** The documentation, `INSTALL.txt`, the licence notices and the
+  source comments say "OpenCloud Comic Reader". Inside OpenCloud, where the
+  context is clear, the app is still listed as "Comic Reader", and its menu
+  entry still reads "Open in Comic Reader".
+- The decoders load under a new cache key, because files in `vendor/` changed
+  (their notices and comments), so a browser fetches them once more after the
+  update.
+
+### Fixed
+- Two 7-Zip licence texts in `vendor/sevenzip/` were marked executable. The
+  package now gives every file the same modes, whatever the source has, and so
+  does the demo site's build.
+- `docs/solid-rar.md` in the source package still said password-protected RAR
+  archives were not supported.
+
+### Not noted for 1.2.2
+- **Its release was the first built by the repository's workflow.** Each
+  release since has the app ready to install, `comic-reader-<version>.tar.gz`,
+  with its SHA-256, built from the tagged source; `scripts/package.sh` makes
+  the package the same way, byte for byte, and `scripts/release-notes.sh`
+  checks that the version agrees everywhere before a release.
+- Two tests that try hundreds of wrong passwords, which timed out on slower
+  machines, got a time limit of their own then.
+
 ## 1.2.2 — 2026-11-13
 
 Password-protected comics in every format, two fixes found by installing

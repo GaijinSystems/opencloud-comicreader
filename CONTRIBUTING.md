@@ -113,8 +113,10 @@ tagged source.
 
 1. In one commit, set the new version in `package.json` and `package-lock.json`
    (`npm version 1.2.3 --no-git-tag-version`), on the first line of `public/INSTALL.txt`,
-   and as a `## 1.2.3 — <date>` section of `CHANGELOG.md`, which becomes the release notes.
-   `sh scripts/release-notes.sh` checks that all four agree and prints the notes; the
+   in the download commands in the repository's `README.md`, and as a
+   `## 1.2.3 — <date>` section of `CHANGELOG.md`, which becomes the release notes. Copy
+   `CHANGELOG.md` to the repository's `docs/CHANGELOG.md`.
+   `sh scripts/release-notes.sh` checks that they all agree and prints the notes; the
    workflow runs it on every push.
 2. Push main and let its run pass.
 3. `git tag v1.2.3 && git push origin v1.2.3`

@@ -7,7 +7,7 @@
 #
 # The built app folder is what `npm run build` puts in dist/. It is copied,
 # not changed. The same build gives the same bytes: the files are stored in a
-# fixed order, with fixed owners, modes normalised to 644 and 755, all dated
+# fixed order, with fixed owners, modes set to 644 and 755, all dated
 # by SOURCE_DATE_EPOCH (by default, the time of the last commit), and gzip
 # records no name or time.
 # Needs GNU tar.
@@ -30,8 +30,11 @@ cp -R "$build" "$work/comic-reader"
 rm -f "$work/comic-reader/SHA256SUMS"
 (cd "$work/comic-reader" && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > "$work/SHA256SUMS")
 mv "$work/SHA256SUMS" "$work/comic-reader/"
+# whatever modes the build had: nothing in the app is meant to be executable
+find "$work/comic-reader" -type d -exec chmod 755 {} +
+find "$work/comic-reader" -type f -exec chmod 644 {} +
 # tar runs gzip itself, so that a failure of either stops the script
 tar -C "$work" --sort=name --owner=0 --group=0 --numeric-owner \
-  --mode=u+rwX,go+rX,go-w --mtime="@$epoch" -I 'gzip -9n' -cf "$out/$name" comic-reader
+  --mtime="@$epoch" -I 'gzip -9n' -cf "$out/$name" comic-reader
 (cd "$out" && sha256sum "$name" > "$name.sha256")
 echo "$out/$name"
