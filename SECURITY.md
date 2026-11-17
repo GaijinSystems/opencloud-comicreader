@@ -85,7 +85,8 @@ closed. A wrong password is reported as wrong and nothing else is revealed.
 storage, under a key that includes the user, and hold only a file id, a page number and a time.
 
 **What you install.** Nothing on the main branch is a compiled binary (the `gh-pages` branch
-holds the built demo site, which is not what you install). The three decoders are
+holds the built demo site, which is not what you install, and each release holds the built
+app). The three decoders are
 built from source when you build the app: unarr from the sources in `native/unarr/`, and
 libarchive and 7-Zip's 7z reader from release tarballs that must match recorded SHA-256
 hashes before they are used. The compiler image is pinned by digest and runs without network
@@ -94,6 +95,14 @@ the app's build stops if a decoder does not match them (unless told to go on, wi
 `DECODERS_UNVERIFIED=1`, for a build made with another compiler) or was built from other
 sources than the ones in the tree. JavaScript dependencies are pinned by `package-lock.json`, and the Node
 image the README uses for the JavaScript build is named by digest (Node 24 on Alpine).
+
+A release's package is built the same way, by `.github/workflows/release.yml` on GitHub's
+runners, from the tagged commit: the decoders must match the recorded hashes, and the tests
+must pass, before anything is published. The `.sha256` file published with it shows that a
+download is complete and unchanged; it does not show who built it. If you would rather rely
+on the source alone, build the app yourself. A build of the tagged source should match the
+release file for file, apart from the date in `manifest.json`, as `SHA256SUMS` inside the
+package lets you check.
 
 ## What it does not protect
 

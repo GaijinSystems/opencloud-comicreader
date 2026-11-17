@@ -38,10 +38,12 @@ testfiles/                Test comics. See testfiles/README.txt.
                           and open with it.
 ```
 
-There are no prebuilt downloads and no binaries on this branch. You
-build the app from this source, decoders included, with two commands and a
-few minutes; see the first step below. (The `gh-pages` branch holds the live
-demo, a site built from this source.)
+Each [release](https://github.com/GaijinSystems/opencloud-comicreader/releases)
+has the app ready to install, built from the tagged source by this
+repository's workflow (`.github/workflows/release.yml`). Or build it yourself
+from this source, decoders included, with two commands and a few minutes. The
+first step below covers both. There are no binaries on this branch. (The
+`gh-pages` branch holds the live demo, a site built from this source.)
 
 Check which build is deployed with:
 
@@ -55,10 +57,21 @@ made and a hash of its code, in the form `2026-11-13+a1B2c3D4`.
 
 Comic Reader needs OpenCloud 6.0.0 or newer.
 
-**1. Build and install the app**
+**1. Get the app**
 
-You need podman (docker works the same way) and curl. Nothing else has to be
-installed.
+Download `comic-reader-<version>.tar.gz` and its `.sha256` file from the
+[latest release](https://github.com/GaijinSystems/opencloud-comicreader/releases/latest),
+check the download, and unpack it:
+
+    sha256sum -c comic-reader-1.2.2.tar.gz.sha256
+    tar -xzf comic-reader-1.2.2.tar.gz
+
+That gives a folder named `comic-reader`, which is the app. Its `SHA256SUMS`
+lists the hash of every other file in it, for checking an installed copy
+later.
+
+Or build it yourself. You need podman (docker works the same way) and curl.
+Nothing else has to be installed.
 
 First build the three WebAssembly decoders. This compiles unarr, libarchive
 and 7-Zip's 7z reader from source in an Emscripten container; the libarchive
@@ -80,23 +93,26 @@ Then build the app itself:
 Or, with Node installed: `npm ci --legacy-peer-deps && npm run build`. Either
 way the app is now in `dist/`.
 
-Copy `dist/` into OpenCloud's web app directory as a folder named
-`comic-reader`, so that `comic-reader/manifest.json` sits at the top level of
-the apps directory.
+**2. Install it**
+
+Copy the app (the release's `comic-reader` folder, or `dist/`) into
+OpenCloud's web app directory as a folder named `comic-reader`, so that
+`comic-reader/manifest.json` sits at the top level of the apps directory.
 
 With opencloud-compose the host path is `config/opencloud/apps/`; the compose
 file bind-mounts it to `/var/lib/opencloud/web/assets/apps` inside the
 container. Do *not* use `$OC_DATA_DIR/web/assets/apps` under compose — the
 apps mount is layered on top of the data dir and will shadow it.
 
-    cp -r dist /path/to/opencloud-compose/config/opencloud/apps/comic-reader
+    cp -r comic-reader /path/to/opencloud-compose/config/opencloud/apps/   # a release
+    cp -r dist /path/to/opencloud-compose/config/opencloud/apps/comic-reader   # your own build
 
 Files must be readable by uid 1000 (the container's default user).
 
 When upgrading, replace the whole folder rather than copying over it, so files
 from the previous version do not linger.
 
-**2. Adjust the CSP**
+**3. Adjust the CSP**
 
 CBZ works immediately. CBR, CB7 and C7Z need `'wasm-unsafe-eval'` in the
 `script-src` CSP directive, because the decoders are WebAssembly builds. That
@@ -114,14 +130,14 @@ Alternatively, a reverse proxy in front of OpenCloud can append the keyword to
 the `script-src` of whatever policy OpenCloud sends, so that later changes to
 the upstream policy still reach the browser.
 
-**3. Restart**
+**4. Restart**
 
     docker compose restart
 
 Apps are discovered at startup; a browser refresh is not enough. No further
 activation is required — the app registers its own file extensions.
 
-**4. Verify**
+**5. Verify**
 
     curl -v -o /dev/null https://your-host/ 2>&1 | grep -i content-security-policy
 

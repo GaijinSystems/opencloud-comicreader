@@ -188,7 +188,7 @@ describe('openComic: a password-protected zip', () => {
     const opened = await openComic(openComicOptions({ password: 'comic' }))
     await opened.adapter.close()
     expect(opened.pages).toHaveLength(1)
-  })
+  }, 60_000) // 1,501 openings: seconds, more on a slow or busy machine
 
   it.each(['Ep', 'pE', 'EEEpp', 'pEE'])(
     'does not take an empty entry for proof of a password (%s)',

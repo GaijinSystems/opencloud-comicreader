@@ -712,7 +712,7 @@ describe('decrypting RAR 2.x encryption (a fixture written by scripts/rar_writer
       expect(result, `guess ${attempt}`).toMatchObject({ status: 'decrypted', proven: false })
     }
     expect(await decryptRar(tiny, 'comic')).toMatchObject({ status: 'decrypted', proven: false })
-  })
+  }, 60_000) // 601 decryptions: seconds, more on a slow or busy machine
 
   it('says which files were encrypted, by their place among the files a decoder lists', async () => {
     /** The blocks of a RAR4 after its marker: each a header and its data. */

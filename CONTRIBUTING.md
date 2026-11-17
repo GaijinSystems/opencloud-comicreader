@@ -88,7 +88,7 @@ libarchive.
   and nothing else.
 - **No binaries on main.** Anything compiled is built from source by a script, in a
   container, with its inputs pinned by hash. (The `gh-pages` branch holds the live demo: a
-  site built from this source, compiled files included.)
+  site built from this source, compiled files included. Releases hold the packaged app.)
 - **Nothing that needs `'unsafe-eval'`.** The app must work under a Content Security Policy
   that adds only `'wasm-unsafe-eval'`.
 - **Archives are untrusted.** Anything read from one is bounded (size, count, time) and
@@ -104,6 +104,25 @@ libarchive.
   plain, direct English.
 - **README.md describes current behaviour;** update it in the same change, and add a line to
   `CHANGELOG.md`.
+
+## Releasing
+
+`.github/workflows/release.yml` tests every push to main. A version tag builds, tests and
+packages the app, publishes it as a GitHub release, and rebuilds the live demo from the
+tagged source.
+
+1. In one commit, set the new version in `package.json` and `package-lock.json`
+   (`npm version 1.2.3 --no-git-tag-version`), on the first line of `public/INSTALL.txt`,
+   and as a `## 1.2.3 — <date>` section of `CHANGELOG.md`, which becomes the release notes.
+   `sh scripts/release-notes.sh` checks that all four agree and prints the notes; the
+   workflow runs it on every push.
+2. Push main and let its run pass.
+3. `git tag v1.2.3 && git push origin v1.2.3`
+
+The package is made by `sh scripts/package.sh dist <folder>`, which gives the same bytes
+for the same build of the same commit. Release tags cannot be moved or deleted. If a run
+fails after the release was created, fix the cause and use "Re-run failed jobs"; a fix
+that needs a change on main needs a new version.
 
 ## License
 

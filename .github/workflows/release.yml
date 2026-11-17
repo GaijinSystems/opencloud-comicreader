@@ -1,0 +1,288 @@
+# Tests every push to main. A version tag (v1.2.3) also packages the app as
+# comic-reader-1.2.3.tar.gz, publishes it as a GitHub release, and publishes the demo site on
+# the gh-pages branch, rebuilt from the tagged code.
+#
+# Releasing: in one commit, set the version in source/web-app-comic-reader/package.json and
+# package-lock.json (npm version 1.2.3 --no-git-tag-version), on the first line of
+# public/INSTALL.txt, and as a "## 1.2.3 — <date>" section of CHANGELOG.md.
+# `sh scripts/release-notes.sh` checks that they agree, as every run of this workflow does.
+# Push main, then:
+#     git tag v1.2.3 && git push origin v1.2.3
+#
+# Nothing is released unless the tests pass and the demo builds. If a later step fails, fix
+# the cause and use "Re-run failed jobs" (not "Re-run all jobs": the release would exist
+# already). Release tags cannot be moved or deleted, so a fix that needs a change on main
+# needs a new version, and so does a demo site that was built wrong (a re-run reuses the site
+# already built). The demo site is published only by the newest release, so re-running an
+# older one never puts its site back.
+name: test and release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+  contents: read
+
+env:
+  APP: source/web-app-comic-reader
+  # Node 24 on Alpine, the image the README builds with; gh-pages' _demo/build.sh reads it too
+  NODE_IMAGE: docker.io/library/node@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
+
+jobs:
+  # Compiles the three WebAssembly decoders in the pinned Emscripten container, without network
+  # access, and requires the exact hashes recorded in native/outputs.sha256. The jobs that use
+  # them check those hashes again (scripts/prepare-decoders.mjs), so they need not trust this
+  # job's artifact.
+  decoders:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build unarr, libarchive and 7-Zip's 7z reader
+        working-directory: ${{ env.APP }}
+        run: |
+          npm run build:native
+          sha256sum -c native/outputs.sha256
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: decoders
+          # the paths below are kept relative to the app directory
+          path: |
+            ${{ env.APP }}/native/*/BUILD-STAMP
+            ${{ env.APP }}/native/libarchive/out/
+            ${{ env.APP }}/public/vendor/unarr/unarr-rar.*
+            ${{ env.APP }}/public/vendor/sevenzip/sevenzip.*
+          if-no-files-found: error
+          retention-days: 30  # as long as GitHub allows a run to be re-run
+
+  # Checks, tests and builds the app; on a version tag, also packages it. Installs the npm
+  # dependencies, so it gets no write access at all.
+  test:
+    needs: decoders
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: decoders
+          path: ${{ env.APP }}
+      - name: Check that the version is the same everywhere
+        run: sh "$APP/scripts/release-notes.sh" > /dev/null
+      - name: Build, check types, run the tests
+        working-directory: ${{ env.APP }}
+        run: |
+          mkdir "$RUNNER_TEMP/dist"
+          podman run --rm -v "$PWD":/src:ro -v "$RUNNER_TEMP/dist":/out "$NODE_IMAGE" sh -euc '
+            cp -a /src/. /tmp/app && cd /tmp/app && rm -rf dist
+            npm ci --legacy-peer-deps --no-audit --no-fund
+            npm run build
+            npm run check:types
+            npm run test:unit
+            node scripts/verify-libarchive.mjs
+            cp -r dist/. /out/'
+      - name: Package the app
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: sh "$APP/scripts/package.sh" "$RUNNER_TEMP/dist" release
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: package
+          path: release/
+          if-no-files-found: error
+          retention-days: 30
+
+  # Builds the demo site from the tagged code with gh-pages' own _demo/build.sh. It installs
+  # the npm dependencies, so it gets no write access either.
+  demo-build:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: decoders
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          path: src
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: gh-pages
+          path: pages
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: decoders
+          path: src/${{ env.APP }}
+      - name: Build the site
+        run: sh pages/_demo/build.sh "$PWD/src/$APP" site
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: demo-site
+          path: site/
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    needs: [test, demo-build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write  # to create the release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0  # to check that the tag is on main
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: package
+          path: release
+      - name: Check the tag against main, the version and the package, and publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
+            || { echo "::error::$GITHUB_REF_NAME is not on main"; exit 1; }
+          code=$(jq -r .version "$APP/package.json")
+          [ "$code" = "$version" ] \
+            || { echo "::error::$GITHUB_REF_NAME does not match version $code in $APP/package.json"; exit 1; }
+          sh "$APP/scripts/release-notes.sh" > notes.md
+          name="comic-reader-$version.tar.gz"
+          found=$(find release -mindepth 1 -printf '%P\n' | LC_ALL=C sort | tr '\n' ' ')
+          [ "$found" = "$name $name.sha256 " ] \
+            || { echo "::error::unexpected files in the package artifact: $found"; exit 1; }
+          (cd release && sha256sum -c "$name.sha256")
+          [ "$(tar -xzOf "release/$name" comic-reader/manifest.json | jq -r .version)" = "$version" ] \
+            || { echo "::error::the package's manifest.json is not at version $version"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" "release/$name" "release/$name.sha256" \
+            --verify-tag --title "Comic Reader $version" --notes-file notes.md
+
+  # Puts the built site on gh-pages and publishes it. Runs no downloaded code, and none from
+  # gh-pages either.
+  demo:
+    needs: [release, demo-build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30  # up to 1 + 10 minutes for the Pages build and 10 for the live check
+    permissions:
+      contents: write  # to push to gh-pages
+      pages: write     # to start the Pages build
+    concurrency:
+      group: gh-pages  # one push to gh-pages at a time, each from the latest gh-pages
+      cancel-in-progress: false
+      queue: max  # keep every waiting job: an older release's must not cancel a newer one's
+    steps:
+      - name: Leave the site to a newer release
+        id: newest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tags=$(gh release list -R "$GITHUB_REPOSITORY" --exclude-drafts --limit 1000 --json tagName -q '.[].tagName')
+          newest=$(printf '%s\n' "$tags" | sort -V | tail -n 1)
+          [ -n "$newest" ] || { echo "::error::could not list the releases"; exit 1; }
+          if [ "$newest" = "$GITHUB_REF_NAME" ]; then
+            echo "publish=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$newest is newer than $GITHUB_REF_NAME; the site is left as it is"
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        if: steps.newest.outputs.publish
+        with:
+          ref: gh-pages
+          path: pages
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        if: steps.newest.outputs.publish
+        with:
+          name: demo-site
+          path: site
+      - name: Commit and push to gh-pages
+        if: steps.newest.outputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # the artifact comes from a job that ran downloaded code: files and folders only, none
+          # of the branch's own (.git, .gitignore, _demo/, README.md, CNAME; upload-artifact
+          # already leaves out hidden files), and no name Jekyll would leave out of the site
+          odd=$(find site -mindepth 1 \( \( ! -type f ! -type d \) -o -name '.*' -o -name '_*' \
+            -o -path site/README.md -o -path site/CNAME \
+            -o -name '#*' -o -name '~*' -o -name '*~' -o -name node_modules -o -name 'Gemfile*' \
+            -o -path site/vendor/bundle -o -path site/vendor/cache -o -path site/vendor/gems \
+            -o -path site/vendor/ruby \) -print)
+          [ -z "$odd" ] || { echo "::error::unexpected entries in the artifact: $(echo "$odd" | tr '\n' ' ')"; exit 1; }
+          [ -s site/index.html ] || { echo "::error::the artifact has no index.html"; exit 1; }
+          find site -type f -print0 | while IFS= read -r -d '' f; do
+            ! cmp -s <(head -c 3 "$f") <(printf %s ---) || { echo "::error::$f begins with front matter, which Jekyll would process"; exit 1; }
+          done
+          # replace the previous build; keep the branch's own files, the same ones gh-pages'
+          # _demo/build.sh keeps
+          find pages -mindepth 1 -maxdepth 1 ! -name .git ! -name .gitignore ! -name _demo \
+            ! -name README.md ! -name CNAME -exec rm -r {} +
+          cp -r site/. pages/
+          cd pages
+          safe() { git -c core.hooksPath=/dev/null -c core.fsmonitor=false "$@"; }
+          safe add -A -- . ':(exclude)_demo'
+          if safe diff --cached --quiet; then
+            echo "The site is unchanged."
+            exit 0
+          fi
+          safe -c user.name=GaijinSystems -c user.email=17348508+GaijinSystems@users.noreply.github.com \
+            commit -q -m "Demo site, built from Comic Reader ${GITHUB_REF_NAME#v}"
+          safe push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:gh-pages
+      - name: Publish and check the site
+        if: steps.newest.outputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # GitHub's documentation says a push made with this job's token starts no Pages build, but
+          # one may start anyway: give it a minute to appear, and request a build only if none did
+          commit=$(git -C pages rev-parse HEAD)
+          latest() { gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest" --jq '.status + " " + .commit + " " + .created_at'; }
+          start=$(date -u +%FT%TZ)
+          seen=
+          for _ in $(seq 6); do
+            state=$(latest) || state=
+            case "$state" in "queued $commit "*|"building $commit "*|"built $commit "*) seen=1; break ;; esac
+            sleep 10
+          done
+          [ -n "$seen" ] || gh api -X POST "repos/$GITHUB_REPOSITORY/pages/builds" > /dev/null
+          built=
+          for _ in $(seq 60); do
+            state=$(latest) || state=
+            case "$state" in
+              "built $commit "*) built=1; break ;;
+              "errored $commit "*)  # an error from before this attempt is not this build's
+                [ "${state##* }" \< "$start" ] || { echo "::error::the Pages build of $commit failed"; exit 1; } ;;
+            esac
+            sleep 10
+          done
+          [ -n "$built" ] || { echo "::error::Pages did not finish building $commit in 10 minutes"; exit 1; }
+          # the live site serves exactly the files just published, and not _demo/; the CDN may
+          # keep old copies for up to 10 minutes (the query string only labels the requests: the
+          # CDN ignores it). File names may
+          # hold spaces and "#", so each is read whole and sent percent-encoded. Each round
+          # fetches again only what did not match yet.
+          domain=$(cat pages/CNAME)
+          url() { jq -rn --arg p "$1" '$p | split("/") | map(@uri) | join("/")'; }
+          same() { curl -sSf --max-time 30 "https://$domain/$(url "$1")?release=$commit" | cmp -s - "site/$1"; }
+          code() { curl -sS --max-time 30 -o /dev/null -w '%{http_code}' "https://$domain/$1?release=$commit"; }
+          mapfile -d '' pending < <(cd site && find . -type f -printf '%P\0')
+          for _ in $(seq 40); do
+            left=()
+            for f in "${pending[@]}"; do same "$f" || left+=("$f"); done
+            pending=("${left[@]}")
+            bad=
+            for f in "${pending[@]}"; do bad="$bad [$f]"; done
+            [ "$(code "")" = 200 ] || bad="$bad /"
+            [ "$(code _demo/build.sh)" = 404 ] || bad="$bad _demo/"
+            [ -z "$bad" ] && exit 0
+            sleep 15
+          done
+          echo "::error::not as published:$bad"
+          exit 1
