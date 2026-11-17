@@ -18,10 +18,15 @@ rest as it is):
 | `_demo/vite.demo.config.ts` | Builds the page, the reader and the decoders as a static site. |
 | `_demo/comics/` | The demo comics, one per format, and a password-protected one (password `comic`). |
 | `_demo/make-comics/` | How the comics are made: pages drawn from shapes in code (no real comic, character or art), rendered in a headless browser, and packed. |
-| `_demo/build.sh` | Rebuilds the site from main. |
+| `_demo/build.sh` | Builds the site from main's source. |
 
-To rebuild after a change to the reader, with main checked out and this
-branch as a worktree inside it:
+Each release of the app rebuilds the site from the tagged source and
+publishes it here: main's `.github/workflows/release.yml` runs
+`_demo/build.sh` and commits the result to this branch. Only the newest
+release does, so an older one never puts its site back.
+
+To rebuild it by hand, for instance to try a change to `_demo/`, with main
+checked out and this branch as a worktree inside it:
 
     git worktree add pages gh-pages
     (cd source/web-app-comic-reader && npm run build:native)
