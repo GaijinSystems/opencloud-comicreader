@@ -1,10 +1,10 @@
-OpenCloud Comic Reader — v1.2.3
+OpenCloud Comic Reader — v1.2.4
 ===============================
 
 Reads .cbz, .cbr, .cb7 and .c7z comic archives in the OpenCloud file manager.
 
-Requires OpenCloud 6.0.0 or newer (tested on 6.0.0 to 9.1.0, and on the
-7.2.5 stable release).
+Requires OpenCloud 6.0.0 or newer (tested on 6.0.0, 8.1.0 and 9.1.0, and on
+the 7.2.5 stable release).
 
 
 1. WHERE TO PUT THIS FOLDER
@@ -51,12 +51,14 @@ that user.
 
 2. CONTENT SECURITY POLICY
 --------------------------
-CBZ works without this step. Everything else needs one addition to
-script-src, because the decoders are WebAssembly:
+Most CBZ files work without this step. CBR, CB7, C7Z, and a CBZ whose pages
+are in bzip2, LZMA or PPMd, need one addition to script-src, because their
+decoders are WebAssembly:
 
-  'wasm-unsafe-eval'   REQUIRED for CBR / CB7 / C7Z. It permits compiling
-                       WebAssembly and nothing else; it does not allow
-                       eval() or new Function().
+  'wasm-unsafe-eval'   REQUIRED for CBR / CB7 / C7Z, and for CBZ in bzip2,
+                       LZMA or PPMd. It permits compiling WebAssembly and
+                       nothing else; it does not allow eval() or
+                       new Function().
 
 That is the only change. In particular the app does NOT need 'unsafe-eval'. If
 an earlier version of OpenCloud Comic Reader had you add it for solid RAR, you
