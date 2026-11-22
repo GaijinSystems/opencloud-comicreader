@@ -19,7 +19,8 @@ app, no unpacking.
 **Requires OpenCloud 6.0.0 or newer.** Version 1.2.2 was tested on OpenCloud
 6.0.0, 8.1.0 and 9.1.0 (rolling) and 7.2.5 (stable): on each, CBZ, CBR and
 CB7 comics, password-protected ones included, opened from the file list and
-showed their pages. Older versions were not tested.
+showed their pages. Older versions were not tested. 1.2.3 and 1.2.4 ship the
+same reader code.
 
 The app is built against `@opencloud-eu/web-pkg` **8.2.2** (the version
 `package-lock.json` pins).
@@ -38,16 +39,20 @@ What actually changed between web-pkg 7.4.0 and 8.0.0 for an app like this:
   registration — identical.
 - `AppWrapperSlotProps` — gained `yjsStatus` and an `onRegister:onSaveCallback`
   emit for collaborative editing; **lost `appVersion`**. Only matters if you
-  `Pick` one of those. This app picks `applicationConfig`, `space`, `resource`,
-  `getUrlForResource` and `revokeUrl`, all unchanged.
+  `Pick` one of those. This app picks `applicationConfig`, `space` and
+  `resource`, all unchanged (`getUrlForResource` and `revokeUrl` come from
+  `AppFileHandlingResult`).
 - The behaviour this app most depends on — `AppWrapper` deciding what to fetch
   by inspecting the wrapped component's declared props — is present in both.
 
 ## Installing
 
-1. Build the app (`npm ci --legacy-peer-deps && npm run build`; the README at
-   the top of the repository has a container command that needs nothing
-   installed) and copy the resulting `dist/` into the web apps directory as
+1. Download `opencloud-comicreader-<version>.zip` (or `.tar.gz`) from the
+   latest release and unpack it, or build the app
+   (`npm ci --legacy-peer-deps && npm run build`; the README at the top of the
+   repository has the details, and a container command that needs nothing
+   installed). Copy the
+   `comic-reader` folder (or `dist/`) into the web apps directory as
    `comic-reader`. That directory defaults to `$OC_DATA_DIR/web/assets/apps/`:
 
    ```
@@ -58,8 +63,8 @@ What actually changed between web-pkg 7.4.0 and 8.0.0 for an app like this:
    instead; that path is already mounted into the container.
 
 2. Allow WebAssembly in the server's content security policy (see below). CBZ
-   works without this, password-protected CBZ included (unless its pages are
-   in bzip2, LZMA or PPMd); CBR and CB7 do not.
+   works without this, password-protected CBZ included, unless its pages are
+   in bzip2, LZMA or PPMd. CBR, CB7 and C7Z need it.
 
 3. Restart the stack:
 
@@ -71,9 +76,10 @@ The app appears automatically and takes over the four comic extensions.
 
 ### Content security policy
 
-RAR and 7z decoding is done by WebAssembly builds of libarchive and unarr, and
-the stock policy does not permit WASM compilation. One directive value is
-required, and it is the only one: nothing in the app needs `'unsafe-eval'`.
+RAR and 7z decoding is done by WebAssembly builds of libarchive, unarr and
+7-Zip's 7z reader, and the stock policy does not permit WASM compilation. One
+directive value is required, and it is the only one: nothing in the app needs
+`'unsafe-eval'`.
 
 ```yaml
 directives:
@@ -97,8 +103,10 @@ the existing one. `dev/docker/opencloud/csp.yaml` is OpenCloud's stock policy
 with the single required line added and marked.
 
 Without these, the reader degrades rather than breaking: CBZ files still open
-(zip.js falls back to decompressing on the main thread), and CBR/CB7 show an
-error explaining that the administrator needs to allow WebAssembly.
+(zip.js falls back to decompressing on the main thread), except that pages in
+bzip2, LZMA or PPMd cannot be shown; a CBZ made only of such pages, like CBR,
+CB7 and C7Z, shows an error explaining that the administrator needs to allow
+WebAssembly.
 
 ## Configuration
 
@@ -252,7 +260,7 @@ Some pages are scanned sideways. The toolbar's rotate button, and `v`, cycle
 0° → 90° → 180° → 270° → 0°. Rotation applies to the whole comic, persists
 across page turns, and resets when the comic is closed. It is never stored.
 
-Two implementation notes, because both are easy to get wrong:
+Some implementation notes, because they are easy to get wrong:
 
 - CSS `transform: rotate()` does **not** change an element's layout box, so a
   page rotated a quarter turn still *occupies* its unrotated dimensions while
@@ -534,9 +542,9 @@ zip.js already runs its own inflate worker pool and libarchive.js spawns its
 own worker internally, so a third layer would have meant nested workers and a
 module-federation worker-URL problem for no benefit.
 
-unarr is the exception because it brings no worker of its own. Its worker is
-a plain module in `public/`, loaded by URL exactly as the libarchive worker
-is, which sidesteps the bundling problem.
+unarr and 7-Zip's 7z reader are the exceptions, because neither brings a
+worker of its own. Their workers are plain modules in `public/`, loaded by URL
+exactly as the libarchive worker is, which sidesteps the bundling problem.
 
 ### Note on `AppWrapper`
 
@@ -565,11 +573,15 @@ npm run test:unit          # includes real CBZ decoding, the real unarr and 7-Zi
 npm run verify:libarchive  # drives the real WASM decoder over CBR/CB7/C7Z
 npm run fixtures:formats   # build the compression matrix (needs 7zip + rar)
 npm run verify:formats     # decode every page of every format variant
+                           # (-- ../../testfiles/formats for the committed set)
 npm run build:native       # build the three decoders (needs podman or docker)
 ```
 
 `fixtures:formats` needs `apt-get install 7zip` (free) and `apt-get install
-rar` (multiverse, proprietary trialware). It is deliberately separate from
+rar` (multiverse, proprietary trialware). The RAR4 variants need a rar older
+than 7.0, named by `RAR4_BIN`, and are skipped without it; see the comment
+above `RAR4_VARIANTS` in `scripts/make-format-matrix.py`. It is deliberately
+separate from
 `npm run fixtures`, which stays buildable from free software alone.
 
 The test archives in `tests/fixtures/` are committed, so the tests run without
@@ -577,7 +589,7 @@ any archiver installed, and each is built by a script that spells out its
 awkward cases: junk entries, nested chapters, non-sequential numbering, a
 landscape double-page and a `ComicInfo.xml` with a deleted page.
 
-Most come from `npm run fixtures`, which needs only Python. Its RAR
+Most come from `npm run fixtures`, which needs only Python and py7zr. Its RAR
 (`sample.cbr`) is written by `scripts/rar_writer.py`, a minimal RAR4 writer
 for stored members, so contributors do not need the proprietary `rar` tool.
 The exception is `tests/fixtures/rar/`: four small compressed and solid RAR
@@ -591,7 +603,8 @@ archives (password `comic`), made with `rar` by
 `scripts/make-sevenzip-fixtures.sh`, and four without checksums, which
 7-Zip will not write, built by hand by
 `scripts/make-sevenzip-nocrc-fixture.mjs`. One
-trap worth knowing if you extend it: with a Unix host OS byte, libarchive
+trap worth knowing if you extend `scripts/rar_writer.py`: with a Unix host OS
+byte, libarchive
 reads the `ATTR` field as a `st_mode`, so the DOS archive bit `0x20` is not a
 regular file and every entry is silently skipped — the archive opens cleanly
 and simply lists nothing. The writer declares a Windows host OS, which is also

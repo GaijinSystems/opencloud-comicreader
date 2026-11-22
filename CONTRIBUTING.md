@@ -121,10 +121,10 @@ tagged source.
 2. Push main and let its run pass.
 3. `git tag v1.2.3 && git push origin v1.2.3`
 
-The package is made by `sh scripts/package.sh dist <folder>`, which gives the same bytes
-for the same build of the same commit. Release tags cannot be moved or deleted. If a run
-fails after the release was created, fix the cause and use "Re-run failed jobs"; a fix
-that needs a change on main needs a new version.
+The packages, a zip and a tarball, are made by `sh scripts/package.sh dist <folder>`,
+which gives the same bytes for the same build of the same commit. Release tags cannot be
+moved or deleted. If a run fails after the release was created, fix the cause and use
+"Re-run failed jobs"; a fix that needs a change on main needs a new version.
 
 ## License
 

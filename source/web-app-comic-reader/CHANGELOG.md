@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.2.4 — 2026-11-22
+
+Release files for OpenCloud's app store, and new screenshots. The reader
+itself is unchanged from 1.2.3.
+
+### Changed
+- **Each release has a zip as well as a tarball, both named
+  `opencloud-comicreader-<version>`.** OpenCloud's app store downloads apps as
+  `.zip` files, so a release now has `opencloud-comicreader-<version>.zip` and
+  `opencloud-comicreader-<version>.tar.gz`, each with its SHA-256. Both hold
+  the same `comic-reader` folder. Up to 1.2.3 there was one file,
+  `comic-reader-<version>.tar.gz`. `scripts/package.sh` makes both, and the
+  same build always gives the same bytes.
+- **New screenshots,** at 3:2 (the shape the app store uses), in OpenCloud's
+  light and dark themes. The README shows the ones that match your GitHub
+  theme.
+
+### Fixed
+- **The repository held four compiled Python files** (`scripts/__pycache__/`),
+  left by the fixture scripts and committed by mistake, although the
+  documentation says main has no compiled binaries. They are gone, and
+  `__pycache__/` is ignored.
+- **Out-of-date statements in the documentation,** among them: browser testing
+  of 1.2.2 that was listed as not done; "CBZ works without WebAssembly", which
+  is not so for a CBZ whose pages are in bzip2, LZMA or PPMd; installing
+  described only as building, although releases have the app ready to install;
+  `verify:formats` described as reading `testfiles/formats/` without being told
+  to; and 7-Zip's 7z reader missing where the decoders are listed.
+
 ## 1.2.3 — 2026-11-17
 
 The project is now called OpenCloud Comic Reader. The reader itself is

@@ -1,6 +1,7 @@
 # Tests every push to main. A version tag (v1.2.3) also packages the app as
-# comic-reader-1.2.3.tar.gz, publishes it as a GitHub release, and publishes the demo site on
-# the gh-pages branch, rebuilt from the tagged code.
+# opencloud-comicreader-1.2.3.zip (the format OpenCloud's app store downloads) and .tar.gz,
+# publishes both as a GitHub release, and publishes the demo site on the gh-pages branch,
+# rebuilt from the tagged code.
 #
 # Releasing: in one commit, set the version in source/web-app-comic-reader/package.json and
 # package-lock.json (npm version 1.2.3 --no-git-tag-version), on the first line of
@@ -155,14 +156,18 @@ jobs:
           [ "$code" = "$version" ] \
             || { echo "::error::$GITHUB_REF_NAME does not match version $code in $APP/package.json"; exit 1; }
           sh "$APP/scripts/release-notes.sh" > notes.md
-          name="comic-reader-$version.tar.gz"
+          base="opencloud-comicreader-$version"
           found=$(find release -mindepth 1 -printf '%P\n' | LC_ALL=C sort | tr '\n' ' ')
-          [ "$found" = "$name $name.sha256 " ] \
+          [ "$found" = "$base.tar.gz $base.tar.gz.sha256 $base.zip $base.zip.sha256 " ] \
             || { echo "::error::unexpected files in the package artifact: $found"; exit 1; }
-          (cd release && sha256sum -c "$name.sha256")
-          [ "$(tar -xzOf "release/$name" comic-reader/manifest.json | jq -r .version)" = "$version" ] \
-            || { echo "::error::the package's manifest.json is not at version $version"; exit 1; }
-          gh release create "$GITHUB_REF_NAME" "release/$name" "release/$name.sha256" \
+          (cd release && sha256sum -c "$base.zip.sha256" "$base.tar.gz.sha256")
+          [ "$(unzip -p "release/$base.zip" comic-reader/manifest.json | jq -r .version)" = "$version" ] &&
+          [ "$(tar -xzOf "release/$base.tar.gz" comic-reader/manifest.json | jq -r .version)" = "$version" ] \
+            || { echo "::error::a package's manifest.json is not at version $version"; exit 1; }
+          [ "$(unzip -Z1 "release/$base.zip" | LC_ALL=C sort)" = "$(tar -tzf "release/$base.tar.gz" | LC_ALL=C sort)" ] \
+            || { echo "::error::the zip and the tarball do not hold the same files"; exit 1; }
+          # release/ holds exactly the four files checked above
+          gh release create "$GITHUB_REF_NAME" release/* \
             --verify-tag --title "OpenCloud Comic Reader $version" --notes-file notes.md
 
   # Puts the built site on gh-pages and publishes it. Runs no downloaded code, and none from

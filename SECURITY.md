@@ -98,8 +98,8 @@ image the README uses for the JavaScript build is named by digest (Node 24 on Al
 
 A release's package is built the same way, by `.github/workflows/release.yml` on GitHub's
 runners, from the tagged commit: the decoders must match the recorded hashes, and the tests
-must pass, before anything is published. The `.sha256` file published with it shows that a
-download is complete and unchanged; it does not show who built it. If you would rather rely
+must pass, before anything is published. The `.sha256` file published with each archive
+shows that a download is complete and unchanged; it does not show who built it. If you would rather rely
 on the source alone, build the app yourself. A build of the tagged source should match the
 release file for file, apart from the date in `manifest.json`, as `SHA256SUMS` inside the
 package lets you check.

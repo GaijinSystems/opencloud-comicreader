@@ -39,8 +39,9 @@ directives:
   script-src:
     - "'self'"
     - "'unsafe-inline'"
-    # REQUIRED for CBR / CB7 / C7Z. libarchive is a WebAssembly build, and
-    # without this the browser refuses to compile it. CBZ is unaffected.
+    # REQUIRED for CBR / CB7 / C7Z. Their decoders are WebAssembly builds, and
+    # without this the browser refuses to compile them. CBZ is unaffected,
+    # unless its pages are in bzip2, LZMA or PPMd.
     - "'wasm-unsafe-eval'"
   style-src:
     - "'self'"

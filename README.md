@@ -8,23 +8,26 @@ running in your browser on a few made-up comics. Nothing to install.
 
 Free software under the GNU AGPL, version 3 or later. See [Licence](#licence).
 
-![Two pages side by side in the reader, inside OpenCloud](docs/screenshots/two-page.png)
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/two-page-dark.png"><img src="docs/screenshots/two-page-light.png" alt="Two pages side by side in the reader, inside OpenCloud"></picture>
 
 | | |
 | --- | --- |
-| ![Comics in the OpenCloud file list](docs/screenshots/file-list.png) | ![A double-page spread shown across the screen](docs/screenshots/spread.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/file-list-dark.png"><img src="docs/screenshots/file-list-light.png" alt="Comics in the OpenCloud file list"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/spread-dark.png"><img src="docs/screenshots/spread-light.png" alt="A double-page spread shown across the screen"></picture> |
 | Comics are ordinary files in OpenCloud. Clicking one opens the reader. | A spread is shown on its own, across the width. |
-| ![The page strip below the reader](docs/screenshots/page-strip.png) | ![The password prompt for a protected comic](docs/screenshots/password.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/page-strip-dark.png"><img src="docs/screenshots/page-strip-light.png" alt="The page strip below the reader"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/password-dark.png"><img src="docs/screenshots/password-light.png" alt="The password prompt for a protected comic"></picture> |
 | The page strip, for jumping anywhere in the book. | Password-protected comics ask for the password, which stays in the browser tab. |
 
-The comics in these pictures and in the demo are made up for them.
+The pictures follow your GitHub theme, light or dark, as the reader follows
+OpenCloud's. The comics in them, and in the demo, were made up for the
+purpose.
 
 ## What is in this repository
 
 ```
 source/                   The app: build, test, modify.
-docs/                     Changelog and solid-RAR notes, plus the original
-                          plan, marked as historical at the top. The
+docs/                     Changelog and solid-RAR notes, the screenshots
+                          above, and the original plan, marked as
+                          historical at the top. The
                           layout harness is with the source, in
                           source/web-app-comic-reader/docs/.
 testfiles/                Test comics. See testfiles/README.txt.
@@ -41,9 +44,9 @@ testfiles/                Test comics. See testfiles/README.txt.
 Each [release](https://github.com/GaijinSystems/opencloud-comicreader/releases)
 has the app ready to install, built from the tagged source by this
 repository's workflow (`.github/workflows/release.yml`). Or build it yourself
-from this source, decoders included, with two commands and a few minutes. The
-first step below covers both. There are no binaries on this branch. (The
-`gh-pages` branch holds the live demo, a site built from this source.)
+from this source, decoders included, in a few minutes. The first step below
+covers both. There are no compiled binaries on this branch. (The `gh-pages`
+branch holds the live demo, a site built from this source.)
 
 Check which build is deployed with:
 
@@ -59,12 +62,17 @@ OpenCloud Comic Reader needs OpenCloud 6.0.0 or newer.
 
 **1. Get the app**
 
-Download `comic-reader-<version>.tar.gz` and its `.sha256` file from the
+Download `opencloud-comicreader-<version>.zip` and its `.sha256` file from the
 [latest release](https://github.com/GaijinSystems/opencloud-comicreader/releases/latest),
 check the download, and unpack it:
 
-    sha256sum -c comic-reader-1.2.3.tar.gz.sha256
-    tar -xzf comic-reader-1.2.3.tar.gz
+    sha256sum -c opencloud-comicreader-1.2.4.zip.sha256
+    unzip opencloud-comicreader-1.2.4.zip
+
+The release also has the same files as a tarball:
+
+    sha256sum -c opencloud-comicreader-1.2.4.tar.gz.sha256
+    tar -xzf opencloud-comicreader-1.2.4.tar.gz
 
 That gives a folder named `comic-reader`, which is the app. Its `SHA256SUMS`
 lists the hash of every other file in it, for checking an installed copy
@@ -114,10 +122,11 @@ from the previous version do not linger.
 
 **3. Adjust the CSP**
 
-CBZ works immediately. CBR, CB7 and C7Z need `'wasm-unsafe-eval'` in the
-`script-src` CSP directive, because the decoders are WebAssembly builds. That
-is the only change the app needs. It does not need `'unsafe-eval'`; if a
-previous version had you add it for solid RAR, remove it again.
+Most CBZ files work immediately. CBR, CB7, C7Z, and a CBZ whose pages use
+bzip2, LZMA or PPMd, need `'wasm-unsafe-eval'` in the `script-src` CSP
+directive, because their decoders are WebAssembly builds. That is the only
+change the app needs. It does not need `'unsafe-eval'`; if a previous version
+had you add it for solid RAR, remove it again.
 
 In OpenCloud's `csp.yaml`, find `script-src` and add the value, quoted:
 
@@ -178,15 +187,15 @@ AES zips, the choice of decoder, and the password prompt end to end
 (OpenCloud's real button component, the real worker scripts and decoders)
 for zip, 7z and RAR; the libarchive WASM decoder driven over
 CBR, CB7 and C7Z (`npm run verify:libarchive`); 17 compression variants decoded
-page by page, and 11 password-protected archives, in every format, checked
+page by page, and 12 password-protected archives, in every format, checked
 to be recognised as such, to decode in full with their password and to be
 refused with a wrong one, each through what the reader uses for it
 (`npm run verify:formats`); a clean typecheck; and the layout harness passing
 all 576 of its cases in headless Chromium (`scripts/check-harness.sh`), which
-covers the fit modes, rotation, the page-turn zones and the retry button. The whole source has been
-through a simplification pass, a bug review and a security review, and the
-unarr decoder was fuzzed with 123,000 mutated archives without a hang or a
-crash.
+covers the fit modes, rotation, the page-turn zones and the retry button.
+Each version's changes have been through a simplification pass, a bug review
+and a security review, and the unarr decoder was fuzzed, on 1.2.1, with
+123,000 mutated archives without a hang or a crash.
 
 Confirmed in a browser, on 1.2.0, on OpenCloud 9.1.0 (rolling) in Firefox ESR
 153.7.0, with a content security policy that has `'wasm-unsafe-eval'` and no
@@ -195,22 +204,24 @@ Confirmed in a browser, on 1.2.0, on OpenCloud 9.1.0 (rolling) in Firefox ESR
 range request; and clicking the page edges still turns the page after
 scrolling in fit-width, fit-height and original size.
 
-Confirmed in a browser on an earlier 1.2.2 build, on the same setup: the
-password prompt, by button and by Enter, opening the password-protected CBZ
-and CB7 test files.
+Confirmed in a browser on the final 1.2.2 build (the reader code 1.2.3 and
+1.2.4 ship), on the same setup: every file in `testfiles/` opens, the
+password-protected ones included. That covers the password prompt by button
+and by Enter, and password-protected CBZ, CB7 and CBR, among them AES zips in
+bzip2, LZMA and PPMd. The same build has the changes since 1.2.0: archives
+and pages handled as Blobs, solid RAR4 going straight to unarr, and the
+libarchive decoder rebuilt from source (libarchive 3.8.11, no OpenSSL) with
+its worker bundled here.
 
 Run against OpenCloud 6.0.0, 8.1.0 and 9.1.0 (rolling) and 7.2.5 (stable), in
 headless Chromium: CBZ, CBR and CB7 comics, password-protected ones included,
 open from the file list and show their pages on each. That is where the
 minimum of 6.0.0 comes from; older versions were not tried.
 
-**Not yet confirmed in a browser:** opening password-protected CBR files,
-and AES zips in bzip2, LZMA or PPMd, both new after that build; and, new
-since 1.2.0, archives and pages travelling as Blobs (this changes how every
-CBR, CB7 and small CBZ is opened), a solid RAR4 going straight to unarr, the
-"Try again" button on a page that failed to load, and the libarchive module
-rebuilt from source (libarchive 3.8.11, no OpenSSL) with its worker bundled
-here. See `docs/CHANGELOG.md`.
+**Not yet confirmed in a browser:** the "Try again" button on a page that
+failed to load, since a good file never fails. Unit tests cover what it does,
+and the layout harness, in headless Chromium, that it can be clicked. See
+`docs/CHANGELOG.md`.
 
 Confirmed on earlier versions: install and registration, click routing for all
 four extensions, authenticated download, public links, reading-position
@@ -220,7 +231,8 @@ two-page spread pairing.
 ## Format support
 
 Every supported container and compression method has a test file in
-`testfiles/formats/`, and `npm run verify:formats` decodes each one through the
+`testfiles/formats/`, and `npm run verify:formats -- ../../testfiles/formats`
+(run in `source/web-app-comic-reader/`) decodes each one through the
 back end the reader actually uses for it.
 
 | Container | Methods that work | Back end |

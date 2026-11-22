@@ -16,3 +16,6 @@ public/vendor/unarr/unarr-rar.mjs
 public/vendor/unarr/unarr-rar.wasm
 public/vendor/sevenzip/sevenzip.mjs
 public/vendor/sevenzip/sevenzip.wasm
+
+# Python bytecode, written when the fixture scripts run
+__pycache__/

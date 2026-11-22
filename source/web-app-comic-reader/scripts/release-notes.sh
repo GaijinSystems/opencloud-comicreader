@@ -40,10 +40,11 @@ esac
 # docs/solid-rar.md. A copy of this folder on its own (the source package), or
 # one placed in another repository, has none of it.
 if [ -f ../../docs/CHANGELOG.md ] && [ -f ../../.github/workflows/release.yml ]; then
-  others=$(grep -o 'comic-reader-[0-9][0-9.]*[0-9]\.tar\.gz' ../../README.md | grep -vxF "comic-reader-$version.tar.gz" || true)
-  if [ -n "$others" ] || ! grep -qF "comic-reader-$version.tar.gz" ../../README.md; then
-    fail "README.md's download commands do not all name comic-reader-$version.tar.gz"
-  fi
+  # (either name: the releases up to 1.2.3 were called comic-reader-<version>)
+  names=$(grep -oE '(opencloud-comicreader|comic-reader)-[0-9][0-9.]*[0-9]\.(tar\.gz|zip)' ../../README.md |
+    LC_ALL=C sort -u | tr '\n' ' ')
+  [ "$names" = "opencloud-comicreader-$version.tar.gz opencloud-comicreader-$version.zip " ] ||
+    fail "README.md's download commands do not all name opencloud-comicreader-$version (.zip and .tar.gz)"
   cmp -s CHANGELOG.md ../../docs/CHANGELOG.md ||
     fail "docs/CHANGELOG.md differs from $PWD/CHANGELOG.md; copy it over"
   cmp -s docs/solid-rar.md ../../docs/solid-rar.md ||

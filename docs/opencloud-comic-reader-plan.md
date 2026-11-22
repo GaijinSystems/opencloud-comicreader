@@ -5,13 +5,13 @@
 > ways the plan could not have known:
 >
 > - There is no single archive worker. zip.js and libarchive.js bring their own
->   workers, and a second RAR decoder (unarr) runs in one of its own.
+>   workers, and unarr (a second RAR decoder) and 7-Zip's 7z reader run in
+>   workers of the app's own.
 > - libarchive does not read solid RAR4, which the plan assumed it would.
 > - The plan's CSP needs (`worker-src blob:`) turned out not to apply; the app
 >   needs only `'wasm-unsafe-eval'` in `script-src`.
 > - Touch and mobile support, next/previous comic, the sidebar panel,
 >   translations and Playwright tests were not built.
-> - It is not distributed as a release zip. It is built from source.
 >
 > For the reader as it is, read the READMEs, `docs/CHANGELOG.md` and
 > `SECURITY.md`.

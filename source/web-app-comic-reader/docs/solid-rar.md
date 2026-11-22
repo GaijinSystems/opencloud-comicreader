@@ -12,8 +12,8 @@ what changed in 1.2.0.
 | RAR4, solid | unarr |
 
 libarchive cannot read solid RAR4: it lists the first entry of a solid block
-and stops, so a six-page comic yields no pages. The reader notices, by
-counting the entries the container itself declares, and hands the archive to
+and stops, so a six-page comic yields no pages. The reader reads the
+archive's own headers first, sees that it is solid, and hands it straight to
 [unarr](https://github.com/selmf/unarr), which reads it in full.
 
 Check it with `testfiles/formats/rar4-solid.cbr`: six pages.
@@ -22,8 +22,8 @@ Check it with `testfiles/formats/rar4-solid.cbr`: six pages.
 
 Nothing beyond what CBR already needs: `'wasm-unsafe-eval'` in `script-src`.
 The unarr module is in `vendor/unarr/` inside the app folder and is loaded
-only when it is needed: for a solid RAR4, or for a RAR4 that libarchive
-rejects.
+only when it is needed: for a solid RAR4, for a password-protected RAR4
+(once it has been decrypted), or for a RAR4 that libarchive rejects.
 
 ## Upgrading from 1.1.2 or earlier
 

@@ -16,8 +16,9 @@ services:
       IDM_CREATE_DEMO_USERS: 'true'
       PROXY_TLS: 'true'
       WEB_ASSET_APPS_PATH: /web/apps
-      # Reading CBR and CB7 needs WebAssembly and a worker. The stock policy
-      # does not allow either, so development mirrors the CSP note in README.
+      # Reading CBR and CB7 (and CBZ in bzip2, LZMA or PPMd) needs WebAssembly,
+      # which the stock policy does not allow, so development mirrors the CSP
+      # note in README.
       PROXY_CSP_CONFIG_FILE_LOCATION: /etc/opencloud/csp.yaml
     ports:
       - '127.0.0.1:9200:9200'
